@@ -38,44 +38,25 @@ class IngestOffer(
         }
         users.findById(command.userId) ?: throw NotFoundException("User not found")
 
-        val url = canonicalizeUrl(command.sourceUrl)
         val now = clock.now()
-        val existing = offers.findByOwnerAndSourceUrl(command.userId, url)
-        val saved = offers.save(
-            if (existing == null) {
-                command.toNewOffer(url, now)
-            } else {
-                existing.withIngest(command, now)
-            },
+        val url = canonicalizeUrl(command.sourceUrl)
+        val draft = JobOffer(
+            id = UUID.randomUUID().toString(),
+            ownerUserId = command.userId,
+            sourceUrl = url,
+            title = command.title,
+            company = command.company,
+            description = command.description,
+            salary = command.salary,
+            tags = command.tags,
+            sourceBot = command.sourceBot,
+            status = OfferStatus.NEW,
+            foundAt = command.foundAt ?: now,
+            updatedAt = now,
         )
-        return IngestResult(saved.id, created = existing == null)
+        val result = offers.upsertIngest(draft)
+        return IngestResult(result.offer.id, result.created)
     }
-
-    private fun IngestOfferCommand.toNewOffer(url: String, now: Instant) = JobOffer(
-        id = UUID.randomUUID().toString(),
-        ownerUserId = userId,
-        sourceUrl = url,
-        title = title,
-        company = company,
-        description = description,
-        salary = salary,
-        tags = tags,
-        sourceBot = sourceBot,
-        status = OfferStatus.NEW,
-        foundAt = foundAt ?: now,
-        updatedAt = now,
-    )
-
-    private fun JobOffer.withIngest(command: IngestOfferCommand, now: Instant) = copy(
-        title = command.title,
-        company = command.company,
-        description = command.description,
-        salary = command.salary,
-        tags = command.tags,
-        sourceBot = command.sourceBot,
-        foundAt = command.foundAt ?: foundAt,
-        updatedAt = now,
-    )
 
     private fun canonicalizeUrl(raw: String): String {
         val uri = URI(raw.trim())
@@ -83,6 +64,12 @@ class IngestOffer(
         val path = uri.path?.trimEnd('/') ?: ""
         val query = uri.query?.let { "?$it" } ?: ""
         val scheme = (uri.scheme ?: "https").lowercase()
-        return "$scheme://$host$path$query"
+        val port = when {
+            uri.port < 0 -> ""
+            scheme == "http" && uri.port == 80 -> ""
+            scheme == "https" && uri.port == 443 -> ""
+            else -> ":${uri.port}"
+        }
+        return "$scheme://$host$port$path$query"
     }
 }

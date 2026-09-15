@@ -14,22 +14,38 @@ export default function App() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [selected, setSelected] = useState<JobOffer | null>(null)
+  const [bootError, setBootError] = useState<string | null>(null)
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
 
   useEffect(() => {
-    getMe()
-      .then(async (user) => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const user = await getMe()
+        if (cancelled) return
         setMe(user)
         if (user.role === 'ADMIN') {
-          const list = await getUsers()
-          setUsers(list)
-          setOwnerUserId((list.find((u) => u.role === 'USER') ?? list[0] ?? user).id)
+          try {
+            const list = await getUsers()
+            if (cancelled) return
+            setUsers(list)
+            setOwnerUserId((list.find((u) => u.role === 'USER') ?? list[0] ?? user).id)
+          } catch (err) {
+            console.error(err)
+            if (!cancelled) setBootError('Failed to load users')
+            setOwnerUserId(user.id)
+          }
         } else {
           setOwnerUserId(user.id)
         }
-      })
-      .catch(() => setMe(null))
+      } catch {
+        if (!cancelled) setMe(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   if (me === undefined) {
@@ -39,6 +55,7 @@ export default function App() {
 
   return (
     <Shell me={me} users={users} ownerUserId={ownerUserId} onOwnerChange={setOwnerUserId}>
+      {bootError && <p className="text-sm text-red-700">{bootError}</p>}
       <div className="flex flex-wrap gap-3 text-sm">
         <label className="flex items-center gap-2">
           Source

@@ -26,7 +26,6 @@ data class SeedUserProps(
 @ConfigurationProperties(prefix = "joblin")
 data class JoblinProperties(
     var seedUsers: List<SeedUserProps> = emptyList(),
-    var logSeedKeys: Boolean = false,
 )
 
 @Component
@@ -47,7 +46,7 @@ class UserSeeder(
             val existing = users.findByEmail(email)
             if (existing != null) return@forEach
 
-            val (apiKeyId, secret, wireKey) = resolveKey(seed.apiKey)
+            val (apiKeyId, secret) = resolveKey(seed.apiKey)
             users.save(
                 User(
                     id = seed.id.ifBlank { UUID.randomUUID().toString() },
@@ -59,22 +58,18 @@ class UserSeeder(
                     createdAt = clock.now(),
                 ),
             )
-            if (props.logSeedKeys) {
-                log.warn("Seeded user {} — bot API key (shown once): {}", email, wireKey)
-            } else {
-                log.info("Seeded user {}", email)
-            }
+            log.info("Seeded user {}", email)
         }
     }
 
-    private fun resolveKey(raw: String): Triple<String, String, String> {
+    private fun resolveKey(raw: String): Pair<String, String> {
         val parsed = ApiKeyFormat.parse(raw)
         if (parsed != null) {
-            return Triple(parsed.first, parsed.second, raw.trim())
+            return parsed.first to parsed.second
         }
         val apiKeyId = randomHex(16)
         val secret = raw.trim()
-        return Triple(apiKeyId, secret, ApiKeyFormat.format(apiKeyId, secret))
+        return apiKeyId to secret
     }
 
     private fun randomHex(chars: Int): String {

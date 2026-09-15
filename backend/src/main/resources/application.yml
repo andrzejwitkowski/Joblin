@@ -17,7 +17,6 @@ spring:
 
 joblin:
   seed-users: []
-  log-seed-keys: false
 
 logging:
   level:

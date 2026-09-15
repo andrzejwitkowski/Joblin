@@ -64,7 +64,7 @@ joblin:
       apiKey: "replace-with-admin-secret"
 ```
 
-Run with `--spring.profiles.active=local`. Run with `--spring.profiles.active=local`. Set `joblin.log-seed-keys: true` locally to print full `jl_…` keys once at startup (off by default so Coolify/SIEM logs stay clean).
+Run with `--spring.profiles.active=local`. Put full `jl_<16hex>_<secret>` values in seed config (see `application-seed.example.yml`); keys are never written to logs.
 
 Google Cloud Console: OAuth client, redirect `http://localhost:8080/login/oauth2/code/google` (and your Coolify HTTPS URL in prod).
 

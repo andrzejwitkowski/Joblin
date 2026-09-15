@@ -53,18 +53,38 @@ export function Board({
                 key={offer.id}
                 draggable
                 onDragStart={(e) => e.dataTransfer.setData('text/offer-id', offer.id)}
-                onClick={() => onSelect(offer)}
-                className="cursor-grab rounded-md border border-[var(--line)] bg-white p-3 shadow-sm active:cursor-grabbing"
+                className="rounded-md border border-[var(--line)] bg-white p-3 shadow-sm"
               >
                 <div className="mb-1 flex items-start justify-between gap-2">
-                  <h3 className="font-medium leading-snug">{offer.title}</h3>
+                  <button
+                    type="button"
+                    className="cursor-pointer text-left font-medium leading-snug hover:underline"
+                    onClick={() => onSelect(offer)}
+                  >
+                    {offer.title}
+                  </button>
                   {offer.sourceBot === 'HERMES' ? (
-                    <Bot size={16} className="shrink-0 text-[var(--muted)]" />
+                    <Bot size={16} className="shrink-0 text-[var(--muted)]" aria-hidden />
                   ) : (
-                    <BriefcaseBusiness size={16} className="shrink-0 text-[var(--muted)]" />
+                    <BriefcaseBusiness size={16} className="shrink-0 text-[var(--muted)]" aria-hidden />
                   )}
                 </div>
                 <p className="text-sm text-[var(--muted)]">{offer.company}</p>
+                <label className="mt-2 flex items-center gap-2 text-xs text-[var(--muted)]">
+                  Status
+                  <select
+                    className="rounded border border-[var(--line)] bg-white px-1 py-0.5 text-xs text-[var(--ink)]"
+                    value={offer.status}
+                    aria-label={`Status for ${offer.title}`}
+                    onChange={(e) => onStatusChange(e.target.value as OfferStatus, offer.id)}
+                  >
+                    {COLUMNS.map((c) => (
+                      <option key={c.status} value={c.status}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </article>
             ))}
           </div>

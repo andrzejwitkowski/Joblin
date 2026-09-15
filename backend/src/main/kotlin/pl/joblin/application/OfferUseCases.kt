@@ -37,8 +37,9 @@ class UpdateOfferStatus(
     private val clock: Clock,
 ) {
     fun execute(actor: User, id: String, status: OfferStatus): JobOffer {
-        val offer = offers.requireAccessible(actor, id)
-        return offers.save(offer.copy(status = status, updatedAt = clock.now()))
+        offers.requireAccessible(actor, id)
+        return offers.updateStatus(id, status, clock.now())
+            ?: throw NotFoundException("Offer not found")
     }
 }
 
