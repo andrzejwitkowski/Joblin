@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --ink: #1a1f16;
+  --paper: #f3efe6;
+  --panel: #ebe4d6;
+  --accent: #2f6f4e;
+  --muted: #6b7265;
+  --line: #d4cbb8;
+  --danger: #8b3a3a;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, #dfe8d8 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, #e8dcc8 0%, transparent 50%),
+    var(--paper);
+  color: var(--ink);
+}
+
+#root {
+  min-height: 100vh;
+}
