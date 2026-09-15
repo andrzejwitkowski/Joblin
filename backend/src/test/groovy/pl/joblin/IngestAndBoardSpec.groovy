@@ -1,57 +1,25 @@
 package pl.joblin
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Import
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.test.context.ActiveProfiles
-import org.spockframework.spring.EnableSharedInjection
 import pl.joblin.ability.IngestUseCaseAbility
 import pl.joblin.ability.OfferFixtureAbility
-import pl.joblin.ability.UserFixtureAbility
-import pl.joblin.adapters.memory.InMemoryJobOfferRepository
-import pl.joblin.adapters.memory.InMemoryUserRepository
 import pl.joblin.application.ForbiddenException
 import pl.joblin.application.ListOffers
 import pl.joblin.application.UpdateOfferStatus
 import pl.joblin.assertion.IngestResultAssert
 import pl.joblin.assertion.OfferAssert
 import pl.joblin.assertion.OfferListAssert
-import pl.joblin.bootstrap.JoblinApplication
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.Role
 import pl.joblin.domain.SourceBot
-import spock.lang.Shared
-import spock.lang.Specification
 
-@SpringBootTest(classes = JoblinApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestAppConfig.class)
-@ActiveProfiles("test")
-@EnableSharedInjection
-class IngestAndBoardSpec extends Specification implements UserFixtureAbility, OfferFixtureAbility, IngestUseCaseAbility {
-
-    @Shared
-    @Autowired
-    InMemoryUserRepository users
-
-    @Shared
-    @Autowired
-    InMemoryJobOfferRepository offers
-
-    @Shared
-    @Autowired
-    PasswordEncoder passwordEncoder
+class IngestAndBoardSpec extends IntegrationBaseSpec implements OfferFixtureAbility, IngestUseCaseAbility {
 
     @Autowired
     ListOffers listOffers
 
     @Autowired
     UpdateOfferStatus updateOfferStatus
-
-    def setup() {
-        users.clear()
-        offers.clear()
-    }
 
     def "ingest creates NEW offer and dedupes by sourceUrl keeping status"() {
         given:

@@ -2,52 +2,16 @@ package pl.joblin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.test.context.ActiveProfiles
-import org.spockframework.spring.EnableSharedInjection
 import pl.joblin.ability.IngestHttpAbility
-import pl.joblin.ability.UserFixtureAbility
-import pl.joblin.adapters.memory.InMemoryJobOfferRepository
-import pl.joblin.adapters.memory.InMemoryUserRepository
-import pl.joblin.bootstrap.JoblinApplication
-import spock.lang.Shared
-import spock.lang.Specification
 
-@SpringBootTest(classes = JoblinApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestAppConfig.class)
-@ActiveProfiles("test")
-@EnableSharedInjection
-class IngestHttpSpec extends Specification implements UserFixtureAbility, IngestHttpAbility {
-
-    @Shared
-    @Autowired
-    InMemoryUserRepository users
-
-    @Shared
-    @Autowired
-    InMemoryJobOfferRepository offers
-
-    @Shared
-    @Autowired
-    PasswordEncoder passwordEncoder
-
-    @Autowired
-    TestRestTemplate restTemplate
+class IngestHttpSpec extends IntegrationBaseSpec implements IngestHttpAbility {
 
     @Autowired
     ObjectMapper objectMapper
-
-    def setup() {
-        users.clear()
-        offers.clear()
-    }
 
     def "HTTP ingest with API key upserts offer"() {
         given:

@@ -1,45 +1,14 @@
 package pl.joblin
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import pl.joblin.adapters.memory.InMemoryJobOfferRepository
-import pl.joblin.adapters.memory.InMemoryUserRepository
-import pl.joblin.application.ConflictRetry
 import pl.joblin.application.ForbiddenException
-import pl.joblin.application.IngestOffer
 import pl.joblin.assertion.IngestResultAssert
 import pl.joblin.assertion.OfferAssert
 import pl.joblin.builder.IngestOfferCommandBuilder
 import pl.joblin.builder.JobOfferBuilder
-import pl.joblin.builder.UserBuilder
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.SourceBot
-import pl.joblin.support.FixedClock
-import pl.joblin.support.FixedIdProvider
-import spock.lang.Specification
 
-class IngestOfferUnitSpec extends Specification {
-
-    def users = new InMemoryUserRepository()
-    def offers = new InMemoryJobOfferRepository()
-    def clock = new FixedClock(TestData.FIXED_NOW)
-    def ids = new FixedIdProvider("offer-fixed-1")
-    def ingest = new IngestOffer(users, offers, clock, ids, new ConflictRetry(ConflictRetry.template()))
-    def encoder = new BCryptPasswordEncoder()
-
-    def setup() {
-        users.clear()
-        offers.clear()
-        users.save(
-            new UserBuilder()
-                .withId(TestData.USER1_ID)
-                .withEmail(TestData.USER1_EMAIL)
-                .withDisplayName("A")
-                .withApiKeyId(TestData.API_KEY_ID_A)
-                .withApiKeyHash(encoder.encode(TestData.API_KEY_SECRET))
-                .withCreatedAt(TestData.FIXED_CREATED_AT)
-                .build()
-        )
-    }
+class IngestOfferUnitSpec extends UnitBaseSpec {
 
     def "creates NEW and preserves status on dedupe"() {
         when:
