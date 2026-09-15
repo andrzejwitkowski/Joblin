@@ -11,12 +11,12 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.context.ActiveProfiles
+import org.spockframework.spring.EnableSharedInjection
 import pl.joblin.ability.IngestHttpAbility
 import pl.joblin.ability.UserFixtureAbility
 import pl.joblin.adapters.memory.InMemoryJobOfferRepository
 import pl.joblin.adapters.memory.InMemoryUserRepository
 import pl.joblin.bootstrap.JoblinApplication
-import org.spockframework.spring.EnableSharedInjection
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -51,9 +51,14 @@ class IngestHttpSpec extends Specification implements UserFixtureAbility, Ingest
 
     def "HTTP ingest with API key upserts offer"() {
         given:
-        def wireKey = seedUser(id: "u1", email: "a@example.com", apiKey: "secret-a", apiKeyId: "aaaaaaaaaaaaaaaa")
+        def wireKey = seedUser(
+            id: TestData.USER1_ID,
+            email: TestData.USER1_EMAIL,
+            apiKey: "secret-a",
+            apiKeyId: TestData.API_KEY_ID_A
+        )
         def body = [
-            userId     : "u1",
+            userId     : TestData.USER1_ID,
             sourceUrl  : "https://example.com/job/1",
             title      : "Dev",
             company    : "Co",
@@ -67,7 +72,7 @@ class IngestHttpSpec extends Specification implements UserFixtureAbility, Ingest
         then:
         res.statusCode == HttpStatus.OK
         objectMapper.readTree(res.body).isArray()
-        offers.findByOwnerAndSourceUrl("u1", "https://example.com/job/1") != null
+        offers.findByOwnerAndSourceUrl(TestData.USER1_ID, "https://example.com/job/1") != null
     }
 
     def "HTTP ingest without key is 401"() {
@@ -77,7 +82,14 @@ class IngestHttpSpec extends Specification implements UserFixtureAbility, Ingest
         def res = restTemplate.exchange(
             "/ingest/offers",
             HttpMethod.POST,
-            new HttpEntity([userId: "u1", sourceUrl: "https://x", title: "t", company: "c", description: "d", sourceBot: "HERMES"], headers),
+            new HttpEntity([
+                userId: TestData.USER1_ID,
+                sourceUrl: "https://x",
+                title: "t",
+                company: "c",
+                description: "d",
+                sourceBot: "HERMES",
+            ], headers),
             String
         )
 

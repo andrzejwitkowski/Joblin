@@ -15,4 +15,5 @@ data class JobOffer(
     val status: OfferStatus,
     val foundAt: Instant,
     val updatedAt: Instant,
+    val version: Long = 0,
 )

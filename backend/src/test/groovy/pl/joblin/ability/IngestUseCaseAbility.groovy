@@ -1,9 +1,10 @@
 package pl.joblin.ability
 
 import org.springframework.beans.factory.annotation.Autowired
+import pl.joblin.TestData
 import pl.joblin.application.IngestOffer
-import pl.joblin.application.IngestOfferCommand
 import pl.joblin.application.IngestResult
+import pl.joblin.builder.IngestOfferCommandBuilder
 import pl.joblin.domain.SourceBot
 
 trait IngestUseCaseAbility {
@@ -14,14 +15,21 @@ trait IngestUseCaseAbility {
         String apiKeyUserId,
         String userId,
         String sourceUrl,
-        String title = "Role",
-        String company = "Co",
-        String description = "Desc",
+        String title = TestData.DEFAULT_INGEST_TITLE,
+        String company = TestData.DEFAULT_INGEST_COMPANY,
+        String description = TestData.DEFAULT_INGEST_DESCRIPTION,
         SourceBot sourceBot = SourceBot.HERMES
     ) {
-        return ingestOffer.execute(
+        ingestOffer.execute(
             apiKeyUserId,
-            new IngestOfferCommand(userId, sourceUrl, title, company, description, null, [], sourceBot, null)
+            new IngestOfferCommandBuilder()
+                .withUserId(userId)
+                .withSourceUrl(sourceUrl)
+                .withTitle(title)
+                .withCompany(company)
+                .withDescription(description)
+                .withSourceBot(sourceBot)
+                .build()
         )
     }
 }

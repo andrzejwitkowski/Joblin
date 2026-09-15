@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import pl.joblin.application.ForbiddenException
 import pl.joblin.application.GetOffer
 import pl.joblin.application.ListOffers
 import pl.joblin.application.ListUsers
@@ -40,7 +41,7 @@ class ApiController(
 
     @GetMapping("/users")
     fun users(@AuthenticationPrincipal principal: JoblinPrincipal?): List<UserView> =
-        listUsers.execute(requireUser(principal)).map { it.toView() }
+        listUsers.execute(requireAdmin(principal)).map { it.toView() }
 
     @GetMapping("/offers")
     fun offers(
@@ -66,4 +67,10 @@ class ApiController(
 
     private fun requireUser(principal: JoblinPrincipal?): User =
         principal?.user ?: throw UnauthorizedException("Not authenticated")
+
+    private fun requireAdmin(principal: JoblinPrincipal?): User {
+        val user = requireUser(principal)
+        if (user.role != Role.ADMIN) throw ForbiddenException("Admin only")
+        return user
+    }
 }

@@ -1,15 +1,15 @@
 package pl.joblin.adapters.memory
 
 import org.springframework.context.annotation.Profile
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Repository
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.OfferFilter
-import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
-import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 @Repository
@@ -35,7 +35,6 @@ class InMemoryUserRepository : UserRepository {
 @Profile("test")
 class InMemoryJobOfferRepository : JobOfferRepository {
     private val byId = ConcurrentHashMap<String, JobOffer>()
-    private val lock = Any()
 
     override fun findById(id: String) = byId[id]
     override fun findByOwnerAndSourceUrl(ownerUserId: String, sourceUrl: String) =
@@ -51,38 +50,59 @@ class InMemoryJobOfferRepository : JobOfferRepository {
             .sortedByDescending { it.foundAt }
 
     override fun save(offer: JobOffer): JobOffer {
-        byId[offer.id] = offer
-        return offer
+        val existing = byId[offer.id]
+        if (existing == null) {
+            val clash = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
+            if (clash != null) {
+                throw DuplicateKeyException("owner_url already exists")
+            }
+            val inserted = offer.copy(version = 0)
+            if (byId.putIfAbsent(offer.id, inserted) != null) {
+                throw OptimisticLockingFailureException("concurrent insert on ${offer.id}")
+            }
+            return inserted
+        }
+        if (existing.version != offer.version) {
+            throw OptimisticLockingFailureException("version mismatch for ${offer.id}")
+        }
+        val updated = offer.copy(version = existing.version + 1)
+        if (!byId.replace(offer.id, existing, updated)) {
+            throw OptimisticLockingFailureException("lost update for ${offer.id}")
+        }
+        return updated
     }
 
-    override fun upsertIngest(offer: JobOffer): UpsertResult = synchronized(lock) {
-        val existing = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
-        return if (existing == null) {
-            byId[offer.id] = offer
-            UpsertResult(offer, created = true)
-        } else {
-            val updated = existing.copy(
-                title = offer.title,
-                company = offer.company,
-                description = offer.description,
-                salary = offer.salary,
-                tags = offer.tags,
-                sourceBot = offer.sourceBot,
-                foundAt = offer.foundAt,
-                updatedAt = offer.updatedAt,
-            )
-            byId[existing.id] = updated
-            UpsertResult(updated, created = false)
+    override fun upsertIngest(offer: JobOffer): UpsertResult {
+        repeat(8) {
+            val existing = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
+            if (existing == null) {
+                try {
+                    return UpsertResult(save(offer), created = true)
+                } catch (_: DuplicateKeyException) {
+                    // concurrent insert won unique key — retry as update
+                } catch (_: OptimisticLockingFailureException) {
+                    // retry
+                }
+            } else {
+                val refreshed = existing.copy(
+                    title = offer.title,
+                    company = offer.company,
+                    description = offer.description,
+                    salary = offer.salary,
+                    tags = offer.tags,
+                    sourceBot = offer.sourceBot,
+                    foundAt = offer.foundAt,
+                    updatedAt = offer.updatedAt,
+                )
+                try {
+                    return UpsertResult(save(refreshed), created = false)
+                } catch (_: OptimisticLockingFailureException) {
+                    // retry
+                }
+            }
         }
+        throw OptimisticLockingFailureException("upsertIngest exhausted retries")
     }
-
-    override fun updateStatus(id: String, status: OfferStatus, updatedAt: Instant): JobOffer? =
-        synchronized(lock) {
-            val existing = byId[id] ?: return null
-            val updated = existing.copy(status = status, updatedAt = updatedAt)
-            byId[id] = updated
-            updated
-        }
 
     fun clear() = byId.clear()
 }

@@ -9,11 +9,11 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import pl.joblin.domain.ApiKeyFormat
 import pl.joblin.domain.Clock
+import pl.joblin.domain.IdProvider
 import pl.joblin.domain.Role
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
 import java.security.SecureRandom
-import java.util.UUID
 
 data class SeedUserProps(
     var email: String = "",
@@ -35,6 +35,7 @@ class UserSeeder(
     private val users: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val clock: Clock,
+    private val ids: IdProvider,
 ) : ApplicationRunner {
     private val log = LoggerFactory.getLogger(javaClass)
     private val random = SecureRandom()
@@ -49,7 +50,7 @@ class UserSeeder(
             val (apiKeyId, secret) = resolveKey(seed.apiKey)
             users.save(
                 User(
-                    id = seed.id.ifBlank { UUID.randomUUID().toString() },
+                    id = seed.id.ifBlank { ids.newId() },
                     email = email,
                     displayName = seed.displayName.ifBlank { email.substringBefore("@") },
                     role = seed.role,

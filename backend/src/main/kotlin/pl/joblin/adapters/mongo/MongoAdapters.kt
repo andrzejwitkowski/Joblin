@@ -1,16 +1,17 @@
 package pl.joblin.adapters.mongo
 
 import org.springframework.context.annotation.Profile
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.domain.Sort
-import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
@@ -49,6 +50,7 @@ data class OfferDocument(
     val status: OfferStatus,
     val foundAt: Instant,
     val updatedAt: Instant,
+    @Version val version: Long? = null,
 )
 
 @Repository
@@ -103,43 +105,40 @@ class MongoJobOfferRepository(
     }
 
     override fun save(offer: JobOffer): JobOffer {
-        mongo.save(offer.toDoc())
-        return offer
+        val saved = mongo.save(offer.toDoc())
+        return saved.toDomain()
     }
 
     override fun upsertIngest(offer: JobOffer): UpsertResult {
-        val query = Query.query(
-            Criteria.where("ownerUserId").`is`(offer.ownerUserId)
-                .and("sourceUrl").`is`(offer.sourceUrl),
-        )
-        val update = Update()
-            .set("title", offer.title)
-            .set("company", offer.company)
-            .set("description", offer.description)
-            .set("salary", offer.salary)
-            .set("tags", offer.tags)
-            .set("sourceBot", offer.sourceBot)
-            .set("foundAt", offer.foundAt)
-            .set("updatedAt", offer.updatedAt)
-            .setOnInsert("_id", offer.id)
-            .setOnInsert("ownerUserId", offer.ownerUserId)
-            .setOnInsert("sourceUrl", offer.sourceUrl)
-            .setOnInsert("status", OfferStatus.NEW)
-
-        val result = mongo.upsert(query, update, OfferDocument::class.java)
-        val created = result.upsertedId != null
-        val saved = mongo.findOne(query, OfferDocument::class.java)?.toDomain()
-            ?: error("upsertIngest lost document")
-        return UpsertResult(saved, created)
-    }
-
-    override fun updateStatus(id: String, status: OfferStatus, updatedAt: Instant): JobOffer? {
-        return mongo.findAndModify(
-            Query.query(Criteria.where("_id").`is`(id)),
-            Update().set("status", status).set("updatedAt", updatedAt),
-            FindAndModifyOptions.options().returnNew(true),
-            OfferDocument::class.java,
-        )?.toDomain()
+        repeat(8) {
+            val existing = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
+            if (existing == null) {
+                try {
+                    return UpsertResult(save(offer), created = true)
+                } catch (_: DuplicateKeyException) {
+                    // concurrent insert — retry as update
+                } catch (_: OptimisticLockingFailureException) {
+                    // retry
+                }
+            } else {
+                val refreshed = existing.copy(
+                    title = offer.title,
+                    company = offer.company,
+                    description = offer.description,
+                    salary = offer.salary,
+                    tags = offer.tags,
+                    sourceBot = offer.sourceBot,
+                    foundAt = offer.foundAt,
+                    updatedAt = offer.updatedAt,
+                )
+                try {
+                    return UpsertResult(save(refreshed), created = false)
+                } catch (_: OptimisticLockingFailureException) {
+                    // retry
+                }
+            }
+        }
+        throw OptimisticLockingFailureException("upsertIngest exhausted retries")
     }
 }
 
@@ -150,7 +149,13 @@ private fun User.toDoc() =
     UserDocument(id, email, displayName, role, apiKeyId, apiKeyHash, createdAt)
 
 private fun OfferDocument.toDomain() =
-    JobOffer(id, ownerUserId, sourceUrl, title, company, description, salary, tags, sourceBot, status, foundAt, updatedAt)
+    JobOffer(
+        id, ownerUserId, sourceUrl, title, company, description, salary, tags,
+        sourceBot, status, foundAt, updatedAt, version ?: 0,
+    )
 
 private fun JobOffer.toDoc() =
-    OfferDocument(id, ownerUserId, sourceUrl, title, company, description, salary, tags, sourceBot, status, foundAt, updatedAt)
+    OfferDocument(
+        id, ownerUserId, sourceUrl, title, company, description, salary, tags,
+        sourceBot, status, foundAt, updatedAt, version,
+    )

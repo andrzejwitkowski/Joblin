@@ -1,14 +1,14 @@
 package pl.joblin.application
 
 import pl.joblin.domain.Clock
+import pl.joblin.domain.IdProvider
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.SourceBot
+import pl.joblin.domain.SourceUrlCanonicalizer
 import pl.joblin.domain.UserRepository
-import java.net.URI
 import java.time.Instant
-import java.util.UUID
 
 data class IngestOfferCommand(
     val userId: String,
@@ -31,6 +31,7 @@ class IngestOffer(
     private val users: UserRepository,
     private val offers: JobOfferRepository,
     private val clock: Clock,
+    private val ids: IdProvider,
 ) {
     fun execute(apiKeyUserId: String, command: IngestOfferCommand): IngestResult {
         if (apiKeyUserId != command.userId) {
@@ -39,11 +40,10 @@ class IngestOffer(
         users.findById(command.userId) ?: throw NotFoundException("User not found")
 
         val now = clock.now()
-        val url = canonicalizeUrl(command.sourceUrl)
         val draft = JobOffer(
-            id = UUID.randomUUID().toString(),
+            id = ids.newId(),
             ownerUserId = command.userId,
-            sourceUrl = url,
+            sourceUrl = SourceUrlCanonicalizer.canonicalize(command.sourceUrl),
             title = command.title,
             company = command.company,
             description = command.description,
@@ -53,23 +53,9 @@ class IngestOffer(
             status = OfferStatus.NEW,
             foundAt = command.foundAt ?: now,
             updatedAt = now,
+            version = 0,
         )
         val result = offers.upsertIngest(draft)
         return IngestResult(result.offer.id, result.created)
-    }
-
-    private fun canonicalizeUrl(raw: String): String {
-        val uri = URI(raw.trim())
-        val host = (uri.host ?: "").lowercase()
-        val path = uri.path?.trimEnd('/') ?: ""
-        val query = uri.query?.let { "?$it" } ?: ""
-        val scheme = (uri.scheme ?: "https").lowercase()
-        val port = when {
-            uri.port < 0 -> ""
-            scheme == "http" && uri.port == 80 -> ""
-            scheme == "https" && uri.port == 443 -> ""
-            else -> ":${uri.port}"
-        }
-        return "$scheme://$host$port$path$query"
     }
 }

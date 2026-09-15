@@ -1,5 +1,7 @@
 package pl.joblin.bootstrap
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -10,9 +12,11 @@ import pl.joblin.application.ListOffers
 import pl.joblin.application.ListUsers
 import pl.joblin.application.UpdateOfferStatus
 import pl.joblin.domain.Clock
+import pl.joblin.domain.IdProvider
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.UserRepository
 import java.time.Instant
+import java.util.UUID
 
 @Configuration
 class AppConfig {
@@ -23,8 +27,21 @@ class AppConfig {
     fun clock(): Clock = Clock { Instant.now() }
 
     @Bean
-    fun ingestOffer(users: UserRepository, offers: JobOfferRepository, clock: Clock) =
-        IngestOffer(users, offers, clock)
+    fun idProvider(): IdProvider = IdProvider { UUID.randomUUID().toString() }
+
+    @Bean
+    fun jacksonAcceptSingleAsArray(): Jackson2ObjectMapperBuilderCustomizer =
+        Jackson2ObjectMapperBuilderCustomizer { builder ->
+            builder.featuresToEnable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+        }
+
+    @Bean
+    fun ingestOffer(
+        users: UserRepository,
+        offers: JobOfferRepository,
+        clock: Clock,
+        ids: IdProvider,
+    ) = IngestOffer(users, offers, clock, ids)
 
     @Bean
     fun listOffers(offers: JobOfferRepository) = ListOffers(offers)

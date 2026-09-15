@@ -5,66 +5,106 @@ import pl.joblin.adapters.memory.InMemoryJobOfferRepository
 import pl.joblin.adapters.memory.InMemoryUserRepository
 import pl.joblin.application.ForbiddenException
 import pl.joblin.application.IngestOffer
-import pl.joblin.application.IngestOfferCommand
-import pl.joblin.domain.Clock
+import pl.joblin.assertion.IngestResultAssert
+import pl.joblin.assertion.OfferAssert
+import pl.joblin.builder.IngestOfferCommandBuilder
+import pl.joblin.builder.JobOfferBuilder
+import pl.joblin.builder.UserBuilder
 import pl.joblin.domain.OfferStatus
-import pl.joblin.domain.Role
 import pl.joblin.domain.SourceBot
-import pl.joblin.domain.User
+import pl.joblin.support.FixedClock
+import pl.joblin.support.FixedIdProvider
 import spock.lang.Specification
-import java.time.Instant
 
 class IngestOfferUnitSpec extends Specification {
 
     def users = new InMemoryUserRepository()
     def offers = new InMemoryJobOfferRepository()
-    def clock = new Clock() {
-        @Override
-        Instant now() { Instant.parse("2026-09-15T10:00:00Z") }
-    }
-    def ingest = new IngestOffer(users, offers, clock)
+    def clock = new FixedClock(TestData.FIXED_NOW)
+    def ids = new FixedIdProvider("offer-fixed-1")
+    def ingest = new IngestOffer(users, offers, clock, ids)
     def encoder = new BCryptPasswordEncoder()
 
     def setup() {
         users.clear()
         offers.clear()
-        users.save(new User(
-            "u1", "a@example.com", "A", Role.USER,
-            "aaaaaaaaaaaaaaaa", encoder.encode("secret"),
-            Instant.parse("2026-09-15T09:00:00Z")
-        ))
+        users.save(
+            new UserBuilder()
+                .withId(TestData.USER1_ID)
+                .withEmail(TestData.USER1_EMAIL)
+                .withDisplayName("A")
+                .withApiKeyId(TestData.API_KEY_ID_A)
+                .withApiKeyHash(encoder.encode(TestData.API_KEY_SECRET))
+                .withCreatedAt(TestData.FIXED_CREATED_AT)
+                .build()
+        )
     }
 
     def "creates NEW and preserves status on dedupe"() {
         when:
-        def first = ingest.execute("u1", new IngestOfferCommand(
-            "u1", "https://Example.com/job/", "T", "C", "D", null, [], SourceBot.HERMES, null
-        ))
+        def first = ingest.execute(
+            TestData.USER1_ID,
+            new IngestOfferCommandBuilder()
+                .withUserId(TestData.USER1_ID)
+                .withSourceUrl("https://Example.com/job/")
+                .withTitle("T")
+                .withCompany("C")
+                .withDescription("D")
+                .withSourceBot(SourceBot.HERMES)
+                .build()
+        )
         def created = offers.findById(first.id)
-        offers.save(created.copy(
-            created.id, created.ownerUserId, created.sourceUrl, created.title, created.company,
-            created.description, created.salary, created.tags, created.sourceBot,
-            OfferStatus.INTERESTED, created.foundAt, created.updatedAt
-        ))
-        def second = ingest.execute("u1", new IngestOfferCommand(
-            "u1", "https://example.com/job", "T2", "C2", "D2", null, [], SourceBot.GROK, null
-        ))
+        offers.save(
+            new JobOfferBuilder()
+                .withId(created.id)
+                .withOwnerUserId(created.ownerUserId)
+                .withSourceUrl(created.sourceUrl)
+                .withTitle(created.title)
+                .withCompany(created.company)
+                .withDescription(created.description)
+                .withSalary(created.salary)
+                .withTags(created.tags)
+                .withSourceBot(created.sourceBot)
+                .withStatus(OfferStatus.INTERESTED)
+                .withFoundAt(created.foundAt)
+                .withUpdatedAt(created.updatedAt)
+                .withVersion(created.version)
+                .build()
+        )
+        ids.set("offer-fixed-2")
+        def second = ingest.execute(
+            TestData.USER1_ID,
+            new IngestOfferCommandBuilder()
+                .withUserId(TestData.USER1_ID)
+                .withSourceUrl("https://example.com/job")
+                .withTitle("T2")
+                .withCompany("C2")
+                .withDescription("D2")
+                .withSourceBot(SourceBot.GROK)
+                .build()
+        )
 
         then:
-        first.created
-        !second.created
-        first.id == second.id
-        def offer = offers.findById(first.id)
-        offer.title == "T2"
-        offer.status == OfferStatus.INTERESTED
-        offer.sourceUrl == "https://example.com/job"
+        IngestResultAssert.assertThat(first).wasCreated()
+        IngestResultAssert.assertThat(second).wasUpdated().hasSameIdAs(first)
+        OfferAssert.assertThat(offers.findById(first.id))
+            .hasTitle("T2")
+            .hasStatus(OfferStatus.INTERESTED)
+            .hasSourceUrl(TestData.EXAMPLE_JOB_URL_CANON)
     }
 
     def "rejects userId mismatch"() {
         when:
-        ingest.execute("u1", new IngestOfferCommand(
-            "other", "https://example.com/1", "T", "C", "D", null, [], SourceBot.HERMES, null
-        ))
+        ingest.execute(
+            TestData.USER1_ID,
+            new IngestOfferCommandBuilder()
+                .withUserId("other")
+                .withSourceUrl("https://example.com/1")
+                .withTitle("T")
+                .withCompany("C")
+                .withDescription("D")
+                .build()
+        )
 
         then:
         thrown(ForbiddenException)

@@ -19,9 +19,8 @@ interface JobOfferRepository {
     fun findById(id: String): JobOffer?
     fun findByOwnerAndSourceUrl(ownerUserId: String, sourceUrl: String): JobOffer?
     fun findByFilter(filter: OfferFilter): List<JobOffer>
+    /** Persist with optimistic version check; throws OptimisticLockingFailureException on conflict. */
     fun save(offer: JobOffer): JobOffer
-    /** Insert or refresh ingest fields; never overwrites existing status. */
+    /** Insert or refresh ingest fields; never overwrites existing status. Retries on version conflicts. */
     fun upsertIngest(offer: JobOffer): UpsertResult
-    /** Atomically set status; returns null if missing. */
-    fun updateStatus(id: String, status: OfferStatus, updatedAt: Instant): JobOffer?
 }
