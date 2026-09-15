@@ -136,7 +136,7 @@ private fun User.toDoc() =
 private fun OfferDocument.toDomain() =
     JobOffer(
         id, ownerUserId, sourceUrl, title, company, description, salary, tags,
-        sourceBot, status, foundAt, updatedAt, version ?: 0,
+        sourceBot, status, foundAt, updatedAt, version,
     )
 
 private fun JobOffer.toDoc() =

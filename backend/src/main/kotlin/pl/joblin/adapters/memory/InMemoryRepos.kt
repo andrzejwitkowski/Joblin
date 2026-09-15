@@ -52,6 +52,11 @@ class InMemoryJobOfferRepository : JobOfferRepository {
     override fun save(offer: JobOffer): JobOffer {
         val existing = byId[offer.id]
         if (existing == null) {
+            if (offer.version != null) {
+                throw OptimisticLockingFailureException(
+                    "Cannot save entity ${offer.id} with version ${offer.version}; Has it been modified meanwhile",
+                )
+            }
             val clash = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
             if (clash != null) {
                 throw DuplicateKeyException("owner_url already exists")
@@ -62,10 +67,10 @@ class InMemoryJobOfferRepository : JobOfferRepository {
             }
             return inserted
         }
-        if (existing.version != offer.version) {
+        if (offer.version == null || existing.version != offer.version) {
             throw OptimisticLockingFailureException("version mismatch for ${offer.id}")
         }
-        val updated = offer.copy(version = existing.version + 1)
+        val updated = offer.copy(version = existing.version!! + 1)
         if (!byId.replace(offer.id, existing, updated)) {
             throw OptimisticLockingFailureException("lost update for ${offer.id}")
         }

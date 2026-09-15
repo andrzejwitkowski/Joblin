@@ -54,7 +54,6 @@ class IngestOffer(
             status = OfferStatus.NEW,
             foundAt = command.foundAt ?: now,
             updatedAt = now,
-            version = 0,
         )
         val result = conflicts.execute { offers.upsertIngest(draft) }
         return IngestResult(result.offer.id, result.created)

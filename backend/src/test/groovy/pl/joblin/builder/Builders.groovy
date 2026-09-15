@@ -48,7 +48,7 @@ class JobOfferBuilder {
     OfferStatus status = OfferStatus.NEW
     Instant foundAt = TestData.FIXED_FOUND_AT
     Instant updatedAt = TestData.FIXED_FOUND_AT
-    long version = 0
+    Long version = null
 
     JobOffer build() {
         new JobOffer(
