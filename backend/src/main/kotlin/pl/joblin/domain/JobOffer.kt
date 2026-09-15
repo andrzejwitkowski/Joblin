@@ -15,6 +15,5 @@ data class JobOffer(
     val status: OfferStatus,
     val foundAt: Instant,
     val updatedAt: Instant,
-    /** null = not yet persisted (insert); non-null = optimistic lock token from store. */
     val version: Long? = null,
 )

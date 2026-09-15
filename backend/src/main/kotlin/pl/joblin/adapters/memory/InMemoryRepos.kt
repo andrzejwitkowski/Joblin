@@ -70,7 +70,8 @@ class InMemoryJobOfferRepository : JobOfferRepository {
         if (offer.version == null || existing.version != offer.version) {
             throw OptimisticLockingFailureException("version mismatch for ${offer.id}")
         }
-        val updated = offer.copy(version = existing.version!! + 1)
+        val nextVersion = checkNotNull(existing.version) + 1
+        val updated = offer.copy(version = nextVersion)
         if (!byId.replace(offer.id, existing, updated)) {
             throw OptimisticLockingFailureException("lost update for ${offer.id}")
         }

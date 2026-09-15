@@ -50,6 +50,23 @@ class JobOfferBuilder {
     Instant updatedAt = TestData.FIXED_FOUND_AT
     Long version = null
 
+    static JobOfferBuilder from(JobOffer offer) {
+        new JobOfferBuilder()
+            .withId(offer.id)
+            .withOwnerUserId(offer.ownerUserId)
+            .withSourceUrl(offer.sourceUrl)
+            .withTitle(offer.title)
+            .withCompany(offer.company)
+            .withDescription(offer.description)
+            .withSalary(offer.salary)
+            .withTags(offer.tags)
+            .withSourceBot(offer.sourceBot)
+            .withStatus(offer.status)
+            .withFoundAt(offer.foundAt)
+            .withUpdatedAt(offer.updatedAt)
+            .withVersion(offer.version)
+    }
+
     JobOffer build() {
         new JobOffer(
             id, ownerUserId, sourceUrl, title, company, description,

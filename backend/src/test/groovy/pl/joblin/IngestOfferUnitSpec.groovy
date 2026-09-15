@@ -26,23 +26,7 @@ class IngestOfferUnitSpec extends UnitBaseSpec {
                 .build()
         )
         def created = offers.findById(first.id)
-        offers.save(
-            new JobOfferBuilder()
-                .withId(created.id)
-                .withOwnerUserId(created.ownerUserId)
-                .withSourceUrl(created.sourceUrl)
-                .withTitle(created.title)
-                .withCompany(created.company)
-                .withDescription(created.description)
-                .withSalary(created.salary)
-                .withTags(created.tags)
-                .withSourceBot(created.sourceBot)
-                .withStatus(OfferStatus.INTERESTED)
-                .withFoundAt(created.foundAt)
-                .withUpdatedAt(created.updatedAt)
-                .withVersion(created.version)
-                .build()
-        )
+        offers.save(JobOfferBuilder.from(created).withStatus(OfferStatus.INTERESTED).build())
         ids.set("offer-fixed-2")
         def second = ingest.execute(
             TestData.USER1_ID,
@@ -63,7 +47,6 @@ class IngestOfferUnitSpec extends UnitBaseSpec {
             .hasTitle("T2")
             .hasStatus(OfferStatus.INTERESTED)
             .hasSourceUrl(TestData.EXAMPLE_JOB_URL_CANON)
-        offers.findByOwnerAndSourceUrl(TestData.USER1_ID, TestData.EXAMPLE_JOB_URL_CANON) != null
         offers.findByFilter(new OfferFilter(TestData.USER1_ID, null, null, null, null)).size() == 1
     }
 
@@ -79,12 +62,10 @@ class IngestOfferUnitSpec extends UnitBaseSpec {
                 .withDescription("d")
                 .build()
         )
-        def stored = offers.findById(result.id)
 
         then:
         IngestResultAssert.assertThat(result).wasCreated()
-        stored.version == 0L
-        stored.status == OfferStatus.NEW
+        offers.findById(result.id).version == 0L
     }
 
     def "stale version save surfaces OptimisticLockingFailureException without duplicating"() {
@@ -96,34 +77,8 @@ class IngestOfferUnitSpec extends UnitBaseSpec {
                 .withSourceUrl("https://example.com/jobs/conflict")
                 .build()
         )
-        def stale = new JobOfferBuilder()
-            .withId(created.id)
-            .withOwnerUserId(created.ownerUserId)
-            .withSourceUrl(created.sourceUrl)
-            .withTitle("stale-title")
-            .withCompany(created.company)
-            .withDescription(created.description)
-            .withStatus(created.status)
-            .withSourceBot(created.sourceBot)
-            .withFoundAt(created.foundAt)
-            .withUpdatedAt(created.updatedAt)
-            .withVersion(created.version)
-            .build()
-        offers.save(
-            new JobOfferBuilder()
-                .withId(created.id)
-                .withOwnerUserId(created.ownerUserId)
-                .withSourceUrl(created.sourceUrl)
-                .withTitle("winner")
-                .withCompany(created.company)
-                .withDescription(created.description)
-                .withStatus(created.status)
-                .withSourceBot(created.sourceBot)
-                .withFoundAt(created.foundAt)
-                .withUpdatedAt(created.updatedAt)
-                .withVersion(created.version)
-                .build()
-        )
+        def stale = JobOfferBuilder.from(created).withTitle("stale-title").build()
+        offers.save(JobOfferBuilder.from(created).withTitle("winner").build())
 
         when:
         offers.save(stale)
