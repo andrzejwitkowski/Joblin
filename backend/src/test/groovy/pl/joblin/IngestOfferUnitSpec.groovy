@@ -3,6 +3,7 @@ package pl.joblin
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import pl.joblin.adapters.memory.InMemoryJobOfferRepository
 import pl.joblin.adapters.memory.InMemoryUserRepository
+import pl.joblin.application.ConflictRetry
 import pl.joblin.application.ForbiddenException
 import pl.joblin.application.IngestOffer
 import pl.joblin.assertion.IngestResultAssert
@@ -22,7 +23,7 @@ class IngestOfferUnitSpec extends Specification {
     def offers = new InMemoryJobOfferRepository()
     def clock = new FixedClock(TestData.FIXED_NOW)
     def ids = new FixedIdProvider("offer-fixed-1")
-    def ingest = new IngestOffer(users, offers, clock, ids)
+    def ingest = new IngestOffer(users, offers, clock, ids, new ConflictRetry(ConflictRetry.template()))
     def encoder = new BCryptPasswordEncoder()
 
     def setup() {

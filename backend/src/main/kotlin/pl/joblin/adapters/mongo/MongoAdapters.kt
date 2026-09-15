@@ -1,8 +1,6 @@
 package pl.joblin.adapters.mongo
 
 import org.springframework.context.annotation.Profile
-import org.springframework.dao.DuplicateKeyException
-import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.domain.Sort
@@ -110,35 +108,22 @@ class MongoJobOfferRepository(
     }
 
     override fun upsertIngest(offer: JobOffer): UpsertResult {
-        repeat(8) {
-            val existing = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
-            if (existing == null) {
-                try {
-                    return UpsertResult(save(offer), created = true)
-                } catch (_: DuplicateKeyException) {
-                    // concurrent insert — retry as update
-                } catch (_: OptimisticLockingFailureException) {
-                    // retry
-                }
-            } else {
-                val refreshed = existing.copy(
-                    title = offer.title,
-                    company = offer.company,
-                    description = offer.description,
-                    salary = offer.salary,
-                    tags = offer.tags,
-                    sourceBot = offer.sourceBot,
-                    foundAt = offer.foundAt,
-                    updatedAt = offer.updatedAt,
-                )
-                try {
-                    return UpsertResult(save(refreshed), created = false)
-                } catch (_: OptimisticLockingFailureException) {
-                    // retry
-                }
-            }
+        val existing = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
+        return if (existing == null) {
+            UpsertResult(save(offer), created = true)
+        } else {
+            val refreshed = existing.copy(
+                title = offer.title,
+                company = offer.company,
+                description = offer.description,
+                salary = offer.salary,
+                tags = offer.tags,
+                sourceBot = offer.sourceBot,
+                foundAt = offer.foundAt,
+                updatedAt = offer.updatedAt,
+            )
+            UpsertResult(save(refreshed), created = false)
         }
-        throw OptimisticLockingFailureException("upsertIngest exhausted retries")
     }
 }
 

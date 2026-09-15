@@ -32,6 +32,7 @@ class IngestOffer(
     private val offers: JobOfferRepository,
     private val clock: Clock,
     private val ids: IdProvider,
+    private val conflicts: ConflictRetry,
 ) {
     fun execute(apiKeyUserId: String, command: IngestOfferCommand): IngestResult {
         if (apiKeyUserId != command.userId) {
@@ -55,7 +56,7 @@ class IngestOffer(
             updatedAt = now,
             version = 0,
         )
-        val result = offers.upsertIngest(draft)
+        val result = conflicts.execute { offers.upsertIngest(draft) }
         return IngestResult(result.offer.id, result.created)
     }
 }

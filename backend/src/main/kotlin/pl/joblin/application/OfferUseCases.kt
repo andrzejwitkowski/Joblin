@@ -1,6 +1,5 @@
 package pl.joblin.application
 
-import org.springframework.dao.OptimisticLockingFailureException
 import pl.joblin.domain.Clock
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
@@ -36,18 +35,13 @@ class GetOffer(private val offers: JobOfferRepository) {
 class UpdateOfferStatus(
     private val offers: JobOfferRepository,
     private val clock: Clock,
+    private val conflicts: ConflictRetry,
 ) {
-    fun execute(actor: User, id: String, status: OfferStatus): JobOffer {
-        repeat(8) {
+    fun execute(actor: User, id: String, status: OfferStatus): JobOffer =
+        conflicts.execute {
             val offer = offers.requireAccessible(actor, id)
-            try {
-                return offers.save(offer.copy(status = status, updatedAt = clock.now()))
-            } catch (_: OptimisticLockingFailureException) {
-                // retry with fresh version
-            }
+            offers.save(offer.copy(status = status, updatedAt = clock.now()))
         }
-        throw OptimisticLockingFailureException("Could not update offer status after retries")
-    }
 }
 
 class ListUsers(private val users: UserRepository) {

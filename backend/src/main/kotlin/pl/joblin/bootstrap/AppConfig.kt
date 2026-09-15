@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import pl.joblin.application.ConflictRetry
 import pl.joblin.application.GetOffer
 import pl.joblin.application.IngestOffer
 import pl.joblin.application.ListOffers
@@ -30,6 +31,9 @@ class AppConfig {
     fun idProvider(): IdProvider = IdProvider { UUID.randomUUID().toString() }
 
     @Bean
+    fun conflictRetry(): ConflictRetry = ConflictRetry(ConflictRetry.template())
+
+    @Bean
     fun jacksonAcceptSingleAsArray(): Jackson2ObjectMapperBuilderCustomizer =
         Jackson2ObjectMapperBuilderCustomizer { builder ->
             builder.featuresToEnable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
@@ -41,7 +45,8 @@ class AppConfig {
         offers: JobOfferRepository,
         clock: Clock,
         ids: IdProvider,
-    ) = IngestOffer(users, offers, clock, ids)
+        conflicts: ConflictRetry,
+    ) = IngestOffer(users, offers, clock, ids, conflicts)
 
     @Bean
     fun listOffers(offers: JobOfferRepository) = ListOffers(offers)
@@ -50,7 +55,11 @@ class AppConfig {
     fun getOffer(offers: JobOfferRepository) = GetOffer(offers)
 
     @Bean
-    fun updateOfferStatus(offers: JobOfferRepository, clock: Clock) = UpdateOfferStatus(offers, clock)
+    fun updateOfferStatus(
+        offers: JobOfferRepository,
+        clock: Clock,
+        conflicts: ConflictRetry,
+    ) = UpdateOfferStatus(offers, clock, conflicts)
 
     @Bean
     fun listUsers(users: UserRepository) = ListUsers(users)
