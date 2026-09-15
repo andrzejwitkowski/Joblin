@@ -1,0 +1,21 @@
+# Example seed — copy to application-local.yml and edit
+# Plain apiKey secrets become jl_<generatedId>_<secret>.
+# Or set apiKey already as jl_<16hex>_<secret>.
+joblin:
+  log-seed-keys: true
+  seed-users:
+    - id: user-1
+      email: user1@gmail.com
+      displayName: User One
+      role: USER
+      apiKey: "change-me-user-1"
+    - id: user-2
+      email: user2@gmail.com
+      displayName: User Two
+      role: USER
+      apiKey: "change-me-user-2"
+    - id: admin-1
+      email: admin@gmail.com
+      displayName: Admin
+      role: ADMIN
+      apiKey: "change-me-admin"
