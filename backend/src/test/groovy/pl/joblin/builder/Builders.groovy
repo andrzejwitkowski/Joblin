@@ -1,5 +1,7 @@
 package pl.joblin.builder
 
+import groovy.transform.builder.Builder
+import groovy.transform.builder.SimpleStrategy
 import pl.joblin.TestData
 import pl.joblin.application.IngestOfferCommand
 import pl.joblin.domain.JobOffer
@@ -9,6 +11,7 @@ import pl.joblin.domain.SourceBot
 import pl.joblin.domain.User
 import java.time.Instant
 
+@Builder(builderStrategy = SimpleStrategy, prefix = "with")
 class UserBuilder {
     String id = TestData.USER1_ID
     String email = TestData.USER1_EMAIL
@@ -17,14 +20,6 @@ class UserBuilder {
     String apiKeyId = TestData.API_KEY_ID_A
     String apiKeyHash = "hash"
     Instant createdAt = TestData.FIXED_CREATED_AT
-
-    UserBuilder withId(String v) { id = v; this }
-    UserBuilder withEmail(String v) { email = v; this }
-    UserBuilder withDisplayName(String v) { displayName = v; this }
-    UserBuilder withRole(Role v) { role = v; this }
-    UserBuilder withApiKeyId(String v) { apiKeyId = v; this }
-    UserBuilder withApiKeyHash(String v) { apiKeyHash = v; this }
-    UserBuilder withCreatedAt(Instant v) { createdAt = v; this }
 
     User build() {
         new User(
@@ -39,6 +34,7 @@ class UserBuilder {
     }
 }
 
+@Builder(builderStrategy = SimpleStrategy, prefix = "with")
 class JobOfferBuilder {
     String id = "offer-1"
     String ownerUserId = TestData.USER1_ID
@@ -54,20 +50,6 @@ class JobOfferBuilder {
     Instant updatedAt = TestData.FIXED_FOUND_AT
     long version = 0
 
-    JobOfferBuilder withId(String v) { id = v; this }
-    JobOfferBuilder withOwnerUserId(String v) { ownerUserId = v; this }
-    JobOfferBuilder withSourceUrl(String v) { sourceUrl = v; this }
-    JobOfferBuilder withTitle(String v) { title = v; this }
-    JobOfferBuilder withCompany(String v) { company = v; this }
-    JobOfferBuilder withDescription(String v) { description = v; this }
-    JobOfferBuilder withSalary(String v) { salary = v; this }
-    JobOfferBuilder withTags(List<String> v) { tags = v; this }
-    JobOfferBuilder withSourceBot(SourceBot v) { sourceBot = v; this }
-    JobOfferBuilder withStatus(OfferStatus v) { status = v; this }
-    JobOfferBuilder withFoundAt(Instant v) { foundAt = v; this }
-    JobOfferBuilder withUpdatedAt(Instant v) { updatedAt = v; this }
-    JobOfferBuilder withVersion(long v) { version = v; this }
-
     JobOffer build() {
         new JobOffer(
             id, ownerUserId, sourceUrl, title, company, description,
@@ -76,6 +58,7 @@ class JobOfferBuilder {
     }
 }
 
+@Builder(builderStrategy = SimpleStrategy, prefix = "with")
 class IngestOfferCommandBuilder {
     String userId = TestData.USER1_ID
     String sourceUrl = TestData.EXAMPLE_JOB_URL
@@ -86,16 +69,6 @@ class IngestOfferCommandBuilder {
     List<String> tags = []
     SourceBot sourceBot = SourceBot.HERMES
     Instant foundAt = null
-
-    IngestOfferCommandBuilder withUserId(String v) { userId = v; this }
-    IngestOfferCommandBuilder withSourceUrl(String v) { sourceUrl = v; this }
-    IngestOfferCommandBuilder withTitle(String v) { title = v; this }
-    IngestOfferCommandBuilder withCompany(String v) { company = v; this }
-    IngestOfferCommandBuilder withDescription(String v) { description = v; this }
-    IngestOfferCommandBuilder withSalary(String v) { salary = v; this }
-    IngestOfferCommandBuilder withTags(List<String> v) { tags = v; this }
-    IngestOfferCommandBuilder withSourceBot(SourceBot v) { sourceBot = v; this }
-    IngestOfferCommandBuilder withFoundAt(Instant v) { foundAt = v; this }
 
     IngestOfferCommand build() {
         new IngestOfferCommand(
