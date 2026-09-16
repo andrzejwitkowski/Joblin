@@ -45,6 +45,11 @@ jobs:
           platforms: linux/amd64
           push: true
           provenance: false
+          labels: |
+            org.opencontainers.image.title=Joblin
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           tags: |
             registry.wattly.pl/joblin:${{ steps.version.outputs.value }}
             registry.wattly.pl/joblin:latest
@@ -60,3 +65,10 @@ jobs:
           git config user.email github-actions@github.com
           git tag "$VERSION"
           git push origin "$VERSION"
+
+      - name: Create GitHub release
+        if: steps.version.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: gh release create "$VERSION" --title "$VERSION" --generate-notes --verify-tag
