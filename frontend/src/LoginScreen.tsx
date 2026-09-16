@@ -15,7 +15,7 @@ export function LoginScreen() {
           href="/oauth2/authorization/google"
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--brand-600)]"
         >
-          Continue with Google
+          Kontynuuj z Google
         </a>
       </div>
     </div>

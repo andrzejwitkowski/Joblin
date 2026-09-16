@@ -68,7 +68,7 @@ export function OfferDrawer({ offer, onClose }: { offer: JobOffer; onClose: () =
           </div>
         )}
         <dl className="mt-6 space-y-1 text-xs text-slate-500">
-          <div>Status: {STATUS_META[offer.status].label}</div>
+          <div>Status oferty: {STATUS_META[offer.status].label}</div>
           <div>Źródło: {offer.sourceBot}</div>
           <div>Znaleziono: {new Date(offer.foundAt).toLocaleString('pl-PL')}</div>
           <div>Aktualizacja: {new Date(offer.updatedAt).toLocaleString('pl-PL')}</div>
