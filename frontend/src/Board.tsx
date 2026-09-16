@@ -1,24 +1,9 @@
 import { useRef } from 'react'
-import { Bot, BriefcaseBusiness } from 'lucide-react'
 import type { JobOffer, OfferStatus } from './api'
-
-const COLUMNS: { status: OfferStatus; label: string }[] = [
-  { status: 'NEW', label: 'New' },
-  { status: 'INTERESTED', label: 'Interested' },
-  { status: 'APPLIED', label: 'Applied' },
-  { status: 'NOT_FOR_ME', label: 'Not for me' },
-]
-
-function groupByStatus(offers: JobOffer[]): Record<OfferStatus, JobOffer[]> {
-  const map: Record<OfferStatus, JobOffer[]> = {
-    NEW: [],
-    INTERESTED: [],
-    APPLIED: [],
-    NOT_FOR_ME: [],
-  }
-  for (const o of offers) map[o.status].push(o)
-  return map
-}
+import { groupByStatus, OFFER_STATUSES, STATUS_META } from './offerStatus'
+import { relativeTime } from './relativeTime'
+import { SourceBotIcon } from './SourceBotIcon'
+import { StatusSelect } from './StatusSelect'
 
 export function Board({
   offers,
@@ -40,77 +25,138 @@ export function Board({
   }
 
   return (
-    <div className="grid flex-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-      {COLUMNS.map((col) => (
-        <section
-          key={col.status}
-          className="flex min-h-[420px] flex-col rounded-lg border border-[var(--line)] bg-[var(--panel)]/70"
-        >
-          <h2 className="border-b border-[var(--line)] px-3 py-2 text-sm font-medium tracking-wide">
-            {col.label}
-            <span className="ml-2 text-[var(--muted)]">{byStatus[col.status].length}</span>
-          </h2>
-          <div
-            className="flex flex-1 flex-col gap-2 p-2"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleDrop(e, col.status)}
-          >
-            {byStatus[col.status].map((offer) => (
-              <article
-                key={offer.id}
-                draggable
-                onDragStart={(e) => {
-                  const target = e.target as HTMLElement
-                  if (target.closest('select, button, label, option')) {
-                    e.preventDefault()
-                    return
-                  }
-                  draggingId.current = offer.id
-                  e.dataTransfer.effectAllowed = 'move'
-                  e.dataTransfer.setData('text/plain', offer.id)
-                }}
-                onDragEnd={() => {
-                  draggingId.current = null
-                }}
+    <main className="kanban-scroll flex-1 overflow-x-auto overflow-y-hidden bg-[var(--paper)] p-6">
+      <div className="flex h-full min-w-max items-start gap-5 pb-4">
+        {OFFER_STATUSES.map((status) => {
+          const meta = STATUS_META[status]
+          const items = byStatus[status]
+          return (
+            <section
+              key={status}
+              className="flex max-h-full w-80 flex-col rounded-xl border border-slate-300/70 bg-slate-200/60"
+            >
+              <div className="flex items-center gap-2 rounded-t-xl border-b border-slate-200 bg-white/70 p-3.5">
+                <span className={`h-2.5 w-2.5 rounded-full ${meta.dot}`} />
+                <h2 className="text-xs font-semibold tracking-wide text-slate-800 uppercase">{meta.label}</h2>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${meta.badge}`}>{items.length}</span>
+              </div>
+              <div
+                className="kanban-scroll flex flex-1 flex-col space-y-3.5 overflow-y-auto p-3"
                 onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => handleDrop(e, col.status)}
-                className="rounded-md border border-[var(--line)] bg-white p-3 shadow-sm"
+                onDrop={(e) => handleDrop(e, status)}
               >
-                <div className="mb-1 flex items-start justify-between gap-2">
-                  <button
-                    type="button"
-                    className="cursor-pointer text-left font-medium leading-snug hover:underline"
-                    onClick={() => onSelect(offer)}
-                  >
-                    {offer.title}
-                  </button>
-                  {offer.sourceBot === 'HERMES' ? (
-                    <Bot size={16} className="shrink-0 text-[var(--muted)]" aria-hidden />
-                  ) : (
-                    <BriefcaseBusiness size={16} className="shrink-0 text-[var(--muted)]" aria-hidden />
-                  )}
-                </div>
-                <p className="text-sm text-[var(--muted)]">{offer.company}</p>
-                <label className="mt-2 flex items-center gap-2 text-xs text-[var(--muted)]">
-                  Status
-                  <select
-                    className="rounded border border-[var(--line)] bg-white px-1 py-0.5 text-xs text-[var(--ink)]"
-                    value={offer.status}
-                    aria-label={`Status for ${offer.title}`}
-                    onChange={(e) => onStatusChange(e.target.value as OfferStatus, offer.id)}
-                  >
-                    {COLUMNS.map((c) => (
-                      <option key={c.status} value={c.status}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </article>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+                {items.map((offer) => (
+                  <OfferCard
+                    key={offer.id}
+                    offer={offer}
+                    onSelect={onSelect}
+                    onStatusChange={onStatusChange}
+                    onBeginDrag={(id) => {
+                      draggingId.current = id
+                    }}
+                    onEndDrag={() => {
+                      draggingId.current = null
+                    }}
+                    onDrop={(e) => handleDrop(e, status)}
+                  />
+                ))}
+              </div>
+            </section>
+          )
+        })}
+      </div>
+    </main>
+  )
+}
+
+function OfferCard({
+  offer,
+  onSelect,
+  onStatusChange,
+  onBeginDrag,
+  onEndDrag,
+  onDrop,
+}: {
+  offer: JobOffer
+  onSelect: (offer: JobOffer) => void
+  onStatusChange: (status: OfferStatus, offerId: string) => void
+  onBeginDrag: (id: string) => void
+  onEndDrag: () => void
+  onDrop: (e: React.DragEvent) => void
+}) {
+  const rejected = offer.status === 'NOT_FOR_ME'
+  return (
+    <article
+      draggable
+      onDragStart={(e) => {
+        if ((e.target as HTMLElement).closest('select, button, label, option')) {
+          e.preventDefault()
+          return
+        }
+        onBeginDrag(offer.id)
+        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.setData('text/plain', offer.id)
+      }}
+      onDragEnd={onEndDrag}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+      className={`group cursor-grab rounded-xl border bg-white p-3.5 shadow-[var(--shadow-card)] transition duration-200 hover:shadow-[var(--shadow-card-hover)] ${
+        rejected ? 'border-slate-200 opacity-80 hover:opacity-100' : 'border-slate-200/90'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <span className="mb-1.5 inline-flex items-center rounded border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand)]">
+            {offer.company}
+          </span>
+          <h3
+            className={`text-sm leading-snug font-semibold group-hover:text-[var(--brand)] ${
+              rejected ? 'text-slate-700 line-through' : 'text-slate-900'
+            }`}
+          >
+            <button type="button" className="cursor-pointer text-left" onClick={() => onSelect(offer)}>
+              {offer.title}
+            </button>
+          </h3>
+        </div>
+        <span className="p-1 text-slate-400" title={offer.sourceBot}>
+          <SourceBotIcon bot={offer.sourceBot} />
+        </span>
+      </div>
+
+      {offer.salary && (
+        <p className={`mt-2.5 border-t border-slate-100 pt-2 text-xs font-bold ${rejected ? 'text-slate-500 line-through' : 'text-slate-800'}`}>
+          {offer.salary}
+        </p>
+      )}
+
+      {offer.tags.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap gap-1">
+          {offer.tags.slice(0, 4).map((t) => (
+            <span key={t} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 pt-2.5">
+        <label className="flex items-center gap-1.5">
+          <span className="text-[11px] font-medium text-slate-400">Status:</span>
+          <StatusSelect offer={offer} onStatusChange={onStatusChange} />
+        </label>
+        {rejected ? (
+          <button
+            type="button"
+            className="text-xs text-slate-400 underline hover:text-slate-600"
+            onClick={() => onStatusChange('NEW', offer.id)}
+          >
+            Przywróć
+          </button>
+        ) : (
+          <span className="text-[10px] text-slate-400">{relativeTime(offer.foundAt)}</span>
+        )}
+      </div>
+    </article>
   )
 }
