@@ -14,12 +14,15 @@ import org.springframework.stereotype.Repository
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.OfferFilter
+import pl.joblin.domain.OfferSchemaCatalog
+import pl.joblin.domain.OfferSection
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.Role
 import pl.joblin.domain.SourceBot
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
+import pl.joblin.domain.withIngestedContent
 import java.time.Instant
 
 @Document("users")
@@ -49,6 +52,11 @@ data class OfferDocument(
     val foundAt: Instant,
     val updatedAt: Instant,
     @Version val version: Long? = null,
+    val location: String? = null,
+    val workMode: String? = null,
+    val employmentLabel: String? = null,
+    val schemaVersion: Int = OfferSchemaCatalog.CURRENT_VERSION,
+    val sections: List<OfferSection> = emptyList(),
 )
 
 @Repository
@@ -112,17 +120,7 @@ class MongoJobOfferRepository(
         return if (existing == null) {
             UpsertResult(save(offer), created = true)
         } else {
-            val refreshed = existing.copy(
-                title = offer.title,
-                company = offer.company,
-                description = offer.description,
-                salary = offer.salary,
-                tags = offer.tags,
-                sourceBot = offer.sourceBot,
-                foundAt = offer.foundAt,
-                updatedAt = offer.updatedAt,
-            )
-            UpsertResult(save(refreshed), created = false)
+            UpsertResult(save(existing.withIngestedContent(offer)), created = false)
         }
     }
 }
@@ -135,12 +133,44 @@ private fun User.toDoc() =
 
 private fun OfferDocument.toDomain() =
     JobOffer(
-        id, ownerUserId, sourceUrl, title, company, description, salary, tags,
-        sourceBot, status, foundAt, updatedAt, version ?: 0,
+        id = id,
+        ownerUserId = ownerUserId,
+        sourceUrl = sourceUrl,
+        title = title,
+        company = company,
+        description = description,
+        salary = salary,
+        tags = tags,
+        sourceBot = sourceBot,
+        status = status,
+        foundAt = foundAt,
+        updatedAt = updatedAt,
+        version = version ?: 0,
+        location = location,
+        workMode = workMode,
+        employmentLabel = employmentLabel,
+        schemaVersion = schemaVersion,
+        sections = sections,
     )
 
 private fun JobOffer.toDoc() =
     OfferDocument(
-        id, ownerUserId, sourceUrl, title, company, description, salary, tags,
-        sourceBot, status, foundAt, updatedAt, version,
+        id = id,
+        ownerUserId = ownerUserId,
+        sourceUrl = sourceUrl,
+        title = title,
+        company = company,
+        description = description,
+        salary = salary,
+        tags = tags,
+        sourceBot = sourceBot,
+        status = status,
+        foundAt = foundAt,
+        updatedAt = updatedAt,
+        version = version,
+        location = location,
+        workMode = workMode,
+        employmentLabel = employmentLabel,
+        schemaVersion = schemaVersion,
+        sections = sections,
     )

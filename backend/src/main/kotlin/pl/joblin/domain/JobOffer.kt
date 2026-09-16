@@ -16,4 +16,26 @@ data class JobOffer(
     val foundAt: Instant,
     val updatedAt: Instant,
     val version: Long = 0,
+    val location: String? = null,
+    val workMode: String? = null,
+    val employmentLabel: String? = null,
+    val schemaVersion: Int = OfferSchemaCatalog.CURRENT_VERSION,
+    val sections: List<OfferSection> = emptyList(),
+)
+
+/** Content fields refreshed on ingest upsert; status / identity / version stay on the existing row. */
+fun JobOffer.withIngestedContent(incoming: JobOffer): JobOffer = copy(
+    title = incoming.title,
+    company = incoming.company,
+    description = incoming.description,
+    salary = incoming.salary,
+    tags = incoming.tags,
+    sourceBot = incoming.sourceBot,
+    foundAt = incoming.foundAt,
+    updatedAt = incoming.updatedAt,
+    location = incoming.location,
+    workMode = incoming.workMode,
+    employmentLabel = incoming.employmentLabel,
+    schemaVersion = incoming.schemaVersion,
+    sections = incoming.sections,
 )

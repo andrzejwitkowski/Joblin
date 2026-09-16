@@ -49,11 +49,17 @@ class JobOfferBuilder {
     Instant foundAt = TestData.FIXED_FOUND_AT
     Instant updatedAt = TestData.FIXED_FOUND_AT
     long version = 0
+    String location = null
+    String workMode = null
+    String employmentLabel = null
+    int schemaVersion = 1
+    List sections = []
 
     JobOffer build() {
         new JobOffer(
             id, ownerUserId, sourceUrl, title, company, description,
-            salary, tags, sourceBot, status, foundAt, updatedAt, version
+            salary, tags, sourceBot, status, foundAt, updatedAt, version,
+            location, workMode, employmentLabel, schemaVersion, sections
         )
     }
 }
@@ -69,11 +75,17 @@ class IngestOfferCommandBuilder {
     List<String> tags = []
     SourceBot sourceBot = SourceBot.HERMES
     Instant foundAt = null
+    String location = null
+    String workMode = null
+    String employmentLabel = null
+    Integer schemaVersion = null
+    List sections = []
 
     IngestOfferCommand build() {
         new IngestOfferCommand(
             userId, sourceUrl, title, company, description,
-            salary, tags, sourceBot, foundAt
+            salary, tags, sourceBot, foundAt,
+            location, workMode, employmentLabel, schemaVersion, sections
         )
     }
 }

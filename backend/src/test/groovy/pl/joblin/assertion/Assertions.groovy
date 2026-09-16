@@ -72,6 +72,26 @@ class OfferAssert {
         assert actual.id == id
         this
     }
+
+    OfferAssert hasLocation(String location) {
+        assert actual.location == location
+        this
+    }
+
+    OfferAssert hasSchemaVersion(int version) {
+        assert actual.schemaVersion == version
+        this
+    }
+
+    OfferAssert hasSectionsSize(int size) {
+        assert actual.sections.size() == size
+        this
+    }
+
+    OfferAssert hasEmptySections() {
+        assert actual.sections.isEmpty()
+        this
+    }
 }
 
 class OfferListAssert {
