@@ -19,11 +19,10 @@ data class JobOffer(
     val location: String? = null,
     val workMode: String? = null,
     val employmentLabel: String? = null,
-    val schemaVersion: Int = OfferSchemaCatalog.CURRENT_VERSION,
+    val schemaVersion: Int = OfferLimits.MAX_SCHEMA_VERSION,
     val sections: List<OfferSection> = emptyList(),
 )
 
-/** Content fields refreshed on ingest upsert; status / identity / version stay on the existing row. */
 fun JobOffer.withIngestedContent(incoming: JobOffer): JobOffer = copy(
     title = incoming.title,
     company = incoming.company,

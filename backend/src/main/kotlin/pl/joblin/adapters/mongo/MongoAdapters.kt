@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.OfferFilter
-import pl.joblin.domain.OfferSchemaCatalog
+import pl.joblin.domain.OfferLimits
 import pl.joblin.domain.OfferSection
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.Role
@@ -55,7 +55,7 @@ data class OfferDocument(
     val location: String? = null,
     val workMode: String? = null,
     val employmentLabel: String? = null,
-    val schemaVersion: Int = OfferSchemaCatalog.CURRENT_VERSION,
+    val schemaVersion: Int = OfferLimits.MAX_SCHEMA_VERSION,
     val sections: List<OfferSection> = emptyList(),
 )
 

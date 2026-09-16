@@ -1,7 +1,6 @@
 package pl.joblin
 
 import pl.joblin.application.GetOffer
-import pl.joblin.application.OfferValidationException
 import pl.joblin.assertion.OfferAssert
 import pl.joblin.builder.IngestOfferCommandBuilder
 import pl.joblin.builder.JobOfferBuilder
@@ -76,44 +75,6 @@ class OfferSectionsUnitSpec extends UnitBaseSpec {
         offer.employmentLabel == "B2B / UoP"
         offer.sections[0] instanceof SpecsSection
         ((PillsSection) offer.sections[2]).items[0].tone == OfferTone.SECONDARY
-    }
-
-    def "rejects unknown icon"() {
-        when:
-        ingest.execute(
-            TestData.USER1_ID,
-            new IngestOfferCommandBuilder()
-                .withUserId(TestData.USER1_ID)
-                .withSourceUrl("https://example.com/bad-icon")
-                .withTitle("T")
-                .withCompany("C")
-                .withDescription("D")
-                .withSections([new NarrativeSection("Title", ["Hi"], "not_a_real_icon")])
-                .build()
-        )
-
-        then:
-        def ex = thrown(OfferValidationException)
-        ex.errors.any { it.code == "UNKNOWN_ICON" && it.field == "sections[0].icon" }
-    }
-
-    def "rejects unsupported schema version"() {
-        when:
-        ingest.execute(
-            TestData.USER1_ID,
-            new IngestOfferCommandBuilder()
-                .withUserId(TestData.USER1_ID)
-                .withSourceUrl("https://example.com/future")
-                .withTitle("T")
-                .withCompany("C")
-                .withDescription("D")
-                .withSchemaVersion(99)
-                .build()
-        )
-
-        then:
-        def ex = thrown(OfferValidationException)
-        ex.errors.any { it.code == "UNSUPPORTED_SCHEMA_VERSION" }
     }
 
     def "upsert overwrites sections and preserves status"() {

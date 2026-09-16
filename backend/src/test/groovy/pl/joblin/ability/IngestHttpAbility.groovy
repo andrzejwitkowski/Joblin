@@ -11,14 +11,15 @@ trait IngestHttpAbility {
     @Autowired
     TestRestTemplate restTemplate
 
-    ResponseEntity<String> ingestViaHttp(String apiKey, Map body) {
+    ResponseEntity<String> ingestViaHttp(String apiKey, Object body) {
         def headers = new HttpHeaders()
         headers.set("X-Api-Key", apiKey)
         headers.set("Content-Type", "application/json")
+        def payload = body instanceof List ? body : [body]
         return restTemplate.exchange(
             "/ingest/offers",
             HttpMethod.POST,
-            new HttpEntity(body, headers),
+            new HttpEntity(payload, headers),
             String
         )
     }

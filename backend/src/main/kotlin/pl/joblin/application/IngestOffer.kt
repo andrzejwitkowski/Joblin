@@ -1,12 +1,15 @@
 package pl.joblin.application
 
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import pl.joblin.domain.Clock
 import pl.joblin.domain.IdProvider
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
+import pl.joblin.domain.OfferLimits
 import pl.joblin.domain.OfferSection
-import pl.joblin.domain.OfferSectionValidator
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.SourceBot
 import pl.joblin.domain.SourceUrlCanonicalizer
@@ -26,7 +29,10 @@ data class IngestOfferCommand(
     val location: String? = null,
     val workMode: String? = null,
     val employmentLabel: String? = null,
+    @field:Min(1)
+    @field:Max(OfferLimits.MAX_SCHEMA_VERSION.toLong())
     val schemaVersion: Int? = null,
+    @field:Size(max = OfferLimits.MAX_SECTIONS)
     val sections: List<OfferSection> = emptyList(),
 )
 
@@ -48,9 +54,6 @@ class IngestOffer(
         }
         users.findById(command.userId) ?: throw NotFoundException("User not found")
 
-        val validated = OfferSectionValidator.validate(command.schemaVersion, command.sections)
-        if (validated.errors.isNotEmpty()) throw OfferValidationException(validated.errors)
-
         val now = clock.now()
         val draft = JobOffer(
             id = ids.newId(),
@@ -69,7 +72,7 @@ class IngestOffer(
             location = command.location,
             workMode = command.workMode,
             employmentLabel = command.employmentLabel,
-            schemaVersion = validated.schemaVersion,
+            schemaVersion = command.schemaVersion ?: OfferLimits.MAX_SCHEMA_VERSION,
             sections = command.sections,
         )
         val result = conflicts.execute { offers.upsertIngest(draft) }

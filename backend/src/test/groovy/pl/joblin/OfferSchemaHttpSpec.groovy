@@ -7,14 +7,13 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import pl.joblin.ability.IngestHttpAbility
-import pl.joblin.domain.OfferSchemaCatalog
 
 class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbility {
 
     @Autowired
     ObjectMapper objectMapper
 
-    def "GET offer-schema returns catalog for API key"() {
+    def "GET offer-schema returns generated JSON Schema for API key"() {
         given:
         def wireKey = seedUser(
             id: TestData.USER1_ID,
@@ -36,14 +35,10 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
         then:
         res.statusCode == HttpStatus.OK
         def json = objectMapper.readTree(res.body)
-        json.path("schemaVersion").asInt() == OfferSchemaCatalog.CURRENT_VERSION
-        json.path("sectionTypes").isArray()
-        json.path("sectionTypes").size() > 0
-        json.path("icons").isArray()
-        json.path("icons").size() > 0
-        json.path("limits").path("maxSections").asInt() == OfferSchemaCatalog.limits.maxSections
-        json.path("templates").isArray()
-        json.path("requiredCore").isArray()
+        json.path("type").asText() == "array"
+        json.path("items").path("\$ref").asText().contains("IngestOfferCommand")
+        json.path("\$defs").path("IngestOfferCommand").isObject()
+        json.path("\$defs").path("IngestOfferCommand").path("properties").path("sections").isObject()
     }
 
     def "GET offer-schema without key is 401"() {
@@ -68,26 +63,28 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
             apiKeyId: TestData.API_KEY_ID_A
         )
         def body = [
-            userId     : TestData.USER1_ID,
-            sourceUrl  : "https://example.com/job/rich",
-            title      : "Dev",
-            company    : "Co",
-            description: "Do stuff",
-            sourceBot  : "HERMES",
-            location   : "Remote",
-            workMode   : "100% remote",
-            schemaVersion: 1,
-            sections   : [
-                [
-                    type      : "NARRATIVE",
-                    title     : "About",
-                    icon      : "layers",
-                    paragraphs: ["Hello world"],
-                ],
-                [
-                    type : "SPECS",
-                    items: [
-                        [label: "Pay", value: "20k", icon: "monetization_on"],
+            [
+                userId     : TestData.USER1_ID,
+                sourceUrl  : "https://example.com/job/rich",
+                title      : "Dev",
+                company    : "Co",
+                description: "Do stuff",
+                sourceBot  : "HERMES",
+                location   : "Remote",
+                workMode   : "100% remote",
+                schemaVersion: 1,
+                sections   : [
+                    [
+                        type      : "NARRATIVE",
+                        title     : "About",
+                        icon      : "layers",
+                        paragraphs: ["Hello world"],
+                    ],
+                    [
+                        type : "SPECS",
+                        items: [
+                            [label: "Pay", value: "20k", icon: "monetization_on"],
+                        ],
                     ],
                 ],
             ],
@@ -104,7 +101,7 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
         offer.sections.size() == 2
     }
 
-    def "HTTP ingest rejects unknown icon with errors list"() {
+    def "HTTP ingest rejects unknown icon with schema errors"() {
         given:
         def wireKey = seedUser(
             id: TestData.USER1_ID,
@@ -113,18 +110,20 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
             apiKeyId: TestData.API_KEY_ID_A
         )
         def body = [
-            userId     : TestData.USER1_ID,
-            sourceUrl  : "https://example.com/job/bad",
-            title      : "Dev",
-            company    : "Co",
-            description: "Do stuff",
-            sourceBot  : "HERMES",
-            sections   : [
-                [
-                    type      : "NARRATIVE",
-                    title     : "About",
-                    icon      : "totally_fake_icon",
-                    paragraphs: ["Hello"],
+            [
+                userId     : TestData.USER1_ID,
+                sourceUrl  : "https://example.com/job/bad",
+                title      : "Dev",
+                company    : "Co",
+                description: "Do stuff",
+                sourceBot  : "HERMES",
+                sections   : [
+                    [
+                        type      : "NARRATIVE",
+                        title     : "About",
+                        icon      : "totally_fake_icon",
+                        paragraphs: ["Hello"],
+                    ],
                 ],
             ],
         ]
@@ -136,10 +135,10 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
         res.statusCode == HttpStatus.BAD_REQUEST
         def json = objectMapper.readTree(res.body)
         json.path("errors").isArray()
-        json.path("errors").any { it.path("code").asText() == "UNKNOWN_ICON" }
+        json.path("errors").size() > 0
     }
 
-    def "HTTP ingest rejects unknown section type with errors list"() {
+    def "HTTP ingest rejects unknown section type with schema errors"() {
         given:
         def wireKey = seedUser(
             id: TestData.USER1_ID,
@@ -148,14 +147,16 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
             apiKeyId: TestData.API_KEY_ID_A
         )
         def body = [
-            userId     : TestData.USER1_ID,
-            sourceUrl  : "https://example.com/job/bad-type",
-            title      : "Dev",
-            company    : "Co",
-            description: "Do stuff",
-            sourceBot  : "HERMES",
-            sections   : [
-                [type: "BANNER", title: "x"],
+            [
+                userId     : TestData.USER1_ID,
+                sourceUrl  : "https://example.com/job/bad-type",
+                title      : "Dev",
+                company    : "Co",
+                description: "Do stuff",
+                sourceBot  : "HERMES",
+                sections   : [
+                    [type: "BANNER", title: "x"],
+                ],
             ],
         ]
 
@@ -166,6 +167,6 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
         res.statusCode == HttpStatus.BAD_REQUEST
         def json = objectMapper.readTree(res.body)
         json.path("errors").isArray()
-        json.path("errors").any { it.path("code").asText() == "UNKNOWN_SECTION_TYPE" }
+        json.path("errors").size() > 0
     }
 }

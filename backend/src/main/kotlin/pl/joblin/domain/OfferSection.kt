@@ -2,15 +2,7 @@ package pl.joblin.domain
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-
-enum class OfferSectionType {
-    SPECS,
-    SOURCE,
-    NARRATIVE,
-    CHECKLIST,
-    PILLS,
-    CARDS,
-}
+import jakarta.validation.constraints.Size
 
 enum class OfferTone {
     DEFAULT,
@@ -53,6 +45,7 @@ sealed interface OfferSection {
 }
 
 data class SpecsSection @JvmOverloads constructor(
+    @field:Size(min = 1, max = OfferLimits.MAX_SPECS)
     val items: List<SpecItem>,
     override val icon: String? = null,
 ) : OfferSection
@@ -66,24 +59,28 @@ data class SourceSection @JvmOverloads constructor(
 
 data class NarrativeSection @JvmOverloads constructor(
     val title: String,
+    @field:Size(min = 1, max = OfferLimits.MAX_PARAGRAPHS)
     val paragraphs: List<String>,
     override val icon: String? = null,
 ) : OfferSection
 
 data class ChecklistSection @JvmOverloads constructor(
     val title: String,
+    @field:Size(min = 1, max = OfferLimits.MAX_CHECKLIST_ITEMS)
     val items: List<TitledItem>,
     override val icon: String? = null,
 ) : OfferSection
 
 data class PillsSection @JvmOverloads constructor(
     val title: String,
+    @field:Size(min = 1, max = OfferLimits.MAX_PILLS)
     val items: List<PillItem>,
     override val icon: String? = null,
 ) : OfferSection
 
 data class CardsSection @JvmOverloads constructor(
     val title: String,
+    @field:Size(min = 1, max = OfferLimits.MAX_CARDS)
     val items: List<TitledItem>,
     override val icon: String? = null,
 ) : OfferSection
