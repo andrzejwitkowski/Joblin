@@ -1,7 +1,16 @@
 import { useEffect, useId, useRef } from 'react'
 import type { JobOffer } from './api'
+import { OfferSectionsPreview } from './offerSections'
 
-export function OfferDrawer({ offer, onClose }: { offer: JobOffer; onClose: () => void }) {
+export function OfferDrawer({
+  offer,
+  onClose,
+  onOpenFull,
+}: {
+  offer: JobOffer
+  onClose: () => void
+  onOpenFull: () => void
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
   const previouslyFocused = useRef<HTMLElement | null>(null)
@@ -38,25 +47,25 @@ export function OfferDrawer({ offer, onClose }: { offer: JobOffer; onClose: () =
           {offer.title}
         </h2>
         <p className="mt-1 text-[var(--muted)]">{offer.company}</p>
-        {offer.salary && <p className="mt-3 text-sm">Salary: {offer.salary}</p>}
-        <a
-          className="mt-3 inline-block text-sm text-[var(--accent)] underline"
-          href={offer.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Open source
-        </a>
-        <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed">{offer.description}</p>
-        {offer.tags.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {offer.tags.map((t) => (
-              <span key={t} className="rounded bg-[var(--panel)] px-2 py-0.5 text-xs">
-                {t}
-              </span>
-            ))}
-          </div>
+        {(offer.salary || offer.location) && (
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            {[offer.salary, offer.location].filter(Boolean).join(' · ')}
+          </p>
         )}
+        <div className="mt-3 flex flex-wrap gap-3">
+          <a
+            className="inline-block text-sm text-[var(--accent)] underline"
+            href={offer.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open source
+          </a>
+          <button type="button" className="text-sm font-medium text-[var(--accent)] underline" onClick={onOpenFull}>
+            Full view
+          </button>
+        </div>
+        <OfferSectionsPreview offer={offer} />
         <dl className="mt-6 space-y-1 text-xs text-[var(--muted)]">
           <div>Status: {offer.status}</div>
           <div>Source: {offer.sourceBot}</div>

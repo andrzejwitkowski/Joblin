@@ -4,14 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import pl.joblin.ability.IngestUseCaseAbility
 import pl.joblin.ability.OfferFixtureAbility
 import pl.joblin.application.ForbiddenException
+import pl.joblin.application.GetOffer
 import pl.joblin.application.ListOffers
 import pl.joblin.application.UpdateOfferStatus
 import pl.joblin.assertion.IngestResultAssert
 import pl.joblin.assertion.OfferAssert
 import pl.joblin.assertion.OfferListAssert
+import pl.joblin.builder.IngestOfferCommandBuilder
+import pl.joblin.domain.CardsSection
+import pl.joblin.domain.NarrativeSection
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.Role
 import pl.joblin.domain.SourceBot
+import pl.joblin.domain.SourceSection
+import pl.joblin.domain.TitledItem
 
 class IngestAndBoardSpec extends IntegrationBaseSpec implements OfferFixtureAbility, IngestUseCaseAbility {
 
@@ -20,6 +26,9 @@ class IngestAndBoardSpec extends IntegrationBaseSpec implements OfferFixtureAbil
 
     @Autowired
     UpdateOfferStatus updateOfferStatus
+
+    @Autowired
+    GetOffer getOffer
 
     def "ingest creates NEW offer and dedupes by sourceUrl keeping status"() {
         given:
@@ -83,5 +92,76 @@ class IngestAndBoardSpec extends IntegrationBaseSpec implements OfferFixtureAbil
 
         expect:
         OfferListAssert.assertThat(listOffers.execute(admin, TestData.USER1_ID, null, null, null, null)).hasSize(1)
+    }
+
+    def "upsert overwrites sections and preserves status"() {
+        given:
+        seedUser(id: TestData.USER1_ID, email: TestData.USER1_EMAIL, apiKey: "key-a")
+        def user = userById(TestData.USER1_ID)
+        def first = ingestOffer.execute(
+            TestData.USER1_ID,
+            new IngestOfferCommandBuilder()
+                .withUserId(TestData.USER1_ID)
+                .withSourceUrl("https://example.com/job/")
+                .withTitle("T")
+                .withCompany("C")
+                .withDescription("D")
+                .withSections([new NarrativeSection("Old", ["old"], "layers")])
+                .build()
+        )
+        updateOfferStatus.execute(user, first.id, OfferStatus.INTERESTED)
+
+        when:
+        def second = ingestOffer.execute(
+            TestData.USER1_ID,
+            new IngestOfferCommandBuilder()
+                .withUserId(TestData.USER1_ID)
+                .withSourceUrl("https://example.com/job")
+                .withTitle("T2")
+                .withCompany("C2")
+                .withDescription("D2")
+                .withLocation("Kraków")
+                .withSections([
+                    new CardsSection("Benefity", [new TitledItem("Multisport", "Opis", "favorite")], "workspace_premium"),
+                ])
+                .build()
+        )
+
+        then:
+        IngestResultAssert.assertThat(second).wasUpdated().hasSameIdAs(first)
+        def offer = offers.findById(first.id)
+        OfferAssert.assertThat(offer)
+            .hasTitle("T2")
+            .hasStatus(OfferStatus.INTERESTED)
+            .hasLocation("Kraków")
+            .hasSectionsSize(1)
+        offer.sections[0] instanceof CardsSection
+    }
+
+    def "GetOffer returns persisted sections"() {
+        given:
+        seedUser(id: TestData.USER1_ID, email: TestData.USER1_EMAIL, apiKey: "key-a")
+        def user = userById(TestData.USER1_ID)
+        def result = ingestOffer.execute(
+            TestData.USER1_ID,
+            new IngestOfferCommandBuilder()
+                .withUserId(TestData.USER1_ID)
+                .withSourceUrl("https://example.com/get-me")
+                .withTitle("T")
+                .withCompany("C")
+                .withDescription("D")
+                .withSections([
+                    new SourceSection("Hermes Crawler", "https://example.com/get-me", "HRM-1", "travel_explore"),
+                ])
+                .build()
+        )
+
+        when:
+        def offer = getOffer.execute(user, result.id)
+
+        then:
+        OfferAssert.assertThat(offer).hasSectionsSize(1)
+        offer.sections[0] instanceof SourceSection
+        ((SourceSection) offer.sections[0]).engineLabel == "Hermes Crawler"
     }
 }

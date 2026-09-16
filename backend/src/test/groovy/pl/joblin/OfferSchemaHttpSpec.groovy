@@ -7,6 +7,9 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import pl.joblin.ability.IngestHttpAbility
+import pl.joblin.domain.OfferTone
+import pl.joblin.domain.PillsSection
+import pl.joblin.domain.SpecsSection
 
 class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbility {
 
@@ -54,6 +57,36 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
         res.statusCode == HttpStatus.UNAUTHORIZED
     }
 
+    def "HTTP ingest without sections stores empty sections and schema v1"() {
+        given:
+        def wireKey = seedUser(
+            id: TestData.USER1_ID,
+            email: TestData.USER1_EMAIL,
+            apiKey: "secret-a",
+            apiKeyId: TestData.API_KEY_ID_A
+        )
+        def body = [
+            [
+                userId     : TestData.USER1_ID,
+                sourceUrl  : "https://example.com/job/legacy",
+                title      : "Legacy",
+                company    : "Co",
+                description: "Plain text only",
+                sourceBot  : "HERMES",
+            ],
+        ]
+
+        when:
+        def res = ingestViaHttp(wireKey, body)
+
+        then:
+        res.statusCode == HttpStatus.OK
+        def offer = offers.findByOwnerAndSourceUrl(TestData.USER1_ID, "https://example.com/job/legacy")
+        offer != null
+        offer.sections.isEmpty()
+        offer.schemaVersion == 1
+    }
+
     def "HTTP ingest with sections returns 200 and persists"() {
         given:
         def wireKey = seedUser(
@@ -66,14 +99,22 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
             [
                 userId     : TestData.USER1_ID,
                 sourceUrl  : "https://example.com/job/rich",
-                title      : "Dev",
-                company    : "Co",
-                description: "Do stuff",
+                title      : "Architect",
+                company    : "Allegro",
+                description: "Short",
+                salary     : "32-38k",
                 sourceBot  : "HERMES",
-                location   : "Remote",
-                workMode   : "100% remote",
+                location   : "Warszawa",
+                workMode   : "Hybrid",
+                employmentLabel: "B2B / UoP",
                 schemaVersion: 1,
                 sections   : [
+                    [
+                        type : "SPECS",
+                        items: [
+                            [label: "Pay", value: "32-38k", hint: "+ VAT", icon: "monetization_on"],
+                        ],
+                    ],
                     [
                         type      : "NARRATIVE",
                         title     : "About",
@@ -81,9 +122,11 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
                         paragraphs: ["Hello world"],
                     ],
                     [
-                        type : "SPECS",
+                        type : "PILLS",
+                        title: "Stack",
+                        icon : "terminal",
                         items: [
-                            [label: "Pay", value: "20k", icon: "monetization_on"],
+                            [label: "Kotlin", tone: "SECONDARY", badge: "Core"],
                         ],
                     ],
                 ],
@@ -97,8 +140,14 @@ class OfferSchemaHttpSpec extends IntegrationBaseSpec implements IngestHttpAbili
         res.statusCode == HttpStatus.OK
         def offer = offers.findByOwnerAndSourceUrl(TestData.USER1_ID, "https://example.com/job/rich")
         offer != null
-        offer.location == "Remote"
-        offer.sections.size() == 2
+        offer.location == "Warszawa"
+        offer.workMode == "Hybrid"
+        offer.employmentLabel == "B2B / UoP"
+        offer.schemaVersion == 1
+        offer.sections.size() == 3
+        offer.sections[0] instanceof SpecsSection
+        offer.sections[2] instanceof PillsSection
+        ((PillsSection) offer.sections[2]).items[0].tone == OfferTone.SECONDARY
     }
 
     def "HTTP ingest rejects unknown icon with schema errors"() {

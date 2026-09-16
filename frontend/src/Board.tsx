@@ -1,12 +1,5 @@
 import { Bot, BriefcaseBusiness } from 'lucide-react'
-import type { JobOffer, OfferStatus } from './api'
-
-const COLUMNS: { status: OfferStatus; label: string }[] = [
-  { status: 'NEW', label: 'New' },
-  { status: 'INTERESTED', label: 'Interested' },
-  { status: 'APPLIED', label: 'Applied' },
-  { status: 'NOT_FOR_ME', label: 'Not for me' },
-]
+import { OFFER_STATUSES, type JobOffer, type OfferStatus } from './api'
 
 function groupByStatus(offers: JobOffer[]): Record<OfferStatus, JobOffer[]> {
   const map: Record<OfferStatus, JobOffer[]> = {
@@ -32,23 +25,23 @@ export function Board({
 
   return (
     <div className="grid flex-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-      {COLUMNS.map((col) => (
+      {OFFER_STATUSES.map((col) => (
         <section
-          key={col.status}
+          key={col.value}
           className="flex min-h-[420px] flex-col rounded-lg border border-[var(--line)] bg-[var(--panel)]/70"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault()
             const id = e.dataTransfer.getData('text/offer-id')
-            if (id) onStatusChange(col.status, id)
+            if (id) onStatusChange(col.value, id)
           }}
         >
           <h2 className="border-b border-[var(--line)] px-3 py-2 text-sm font-medium tracking-wide">
             {col.label}
-            <span className="ml-2 text-[var(--muted)]">{byStatus[col.status].length}</span>
+            <span className="ml-2 text-[var(--muted)]">{byStatus[col.value].length}</span>
           </h2>
           <div className="flex flex-1 flex-col gap-2 p-2">
-            {byStatus[col.status].map((offer) => (
+            {byStatus[col.value].map((offer) => (
               <article
                 key={offer.id}
                 draggable
@@ -78,8 +71,8 @@ export function Board({
                     aria-label={`Status for ${offer.title}`}
                     onChange={(e) => onStatusChange(e.target.value as OfferStatus, offer.id)}
                   >
-                    {COLUMNS.map((c) => (
-                      <option key={c.status} value={c.status}>
+                    {OFFER_STATUSES.map((c) => (
+                      <option key={c.value} value={c.value}>
                         {c.label}
                       </option>
                     ))}
