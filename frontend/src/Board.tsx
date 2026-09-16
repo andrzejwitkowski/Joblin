@@ -26,22 +26,22 @@ export function Board({
 
   return (
     <main className="kanban-scroll flex-1 overflow-x-auto overflow-y-hidden bg-[var(--paper)] p-6">
-      <div className="flex h-full min-w-max items-start gap-5 pb-4">
+      <div className="flex h-full min-h-[420px] min-w-max gap-5 pb-4">
         {OFFER_STATUSES.map((status) => {
           const meta = STATUS_META[status]
           const items = byStatus[status]
           return (
             <section
               key={status}
-              className="flex max-h-full w-80 flex-col rounded-xl border border-slate-300/70 bg-slate-200/60"
+              className="flex h-full w-80 flex-col rounded-xl border border-slate-300/70 bg-slate-200/60"
             >
-              <div className="flex items-center gap-2 rounded-t-xl border-b border-slate-200 bg-white/70 p-3.5">
+              <div className="flex flex-shrink-0 items-center gap-2 rounded-t-xl border-b border-slate-200 bg-white/70 p-3.5">
                 <span className={`h-2.5 w-2.5 rounded-full ${meta.dot}`} />
                 <h2 className="text-xs font-semibold tracking-wide text-slate-800 uppercase">{meta.label}</h2>
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${meta.badge}`}>{items.length}</span>
               </div>
               <div
-                className="kanban-scroll flex flex-1 flex-col space-y-3.5 overflow-y-auto p-3"
+                className="kanban-scroll flex min-h-0 flex-1 flex-col space-y-3.5 overflow-y-auto p-3"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => handleDrop(e, status)}
               >
