@@ -63,6 +63,11 @@ export default function App() {
     setSelection((cur) => (cur?.offer.id === updated.id ? { ...cur, offer: updated } : cur))
   }
 
+  function handleOwnerChange(id: string) {
+    setOwnerUserId(id)
+    setSelection(null)
+  }
+
   function handleStatusChange(status: OfferStatus, id: string) {
     setStatusError(null)
     moveOffer(status, id)
@@ -84,7 +89,7 @@ export default function App() {
         me={me}
         users={users}
         ownerUserId={ownerUserId}
-        onOwnerChange={setOwnerUserId}
+        onOwnerChange={handleOwnerChange}
         search={search}
         onSearchChange={setSearch}
       >
@@ -103,7 +108,7 @@ export default function App() {
       me={me}
       users={users}
       ownerUserId={ownerUserId}
-      onOwnerChange={setOwnerUserId}
+      onOwnerChange={handleOwnerChange}
       search={search}
       onSearchChange={setSearch}
     >
