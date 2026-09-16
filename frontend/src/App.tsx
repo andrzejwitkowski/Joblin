@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 import { getMe, getUsers, type JobOffer, type Me, type OfferStatus, type SourceBot, type UserSummary } from './api'
 import { Board } from './Board'
 import { LoginScreen } from './LoginScreen'
+import { OfferDetail } from './OfferDetail'
 import { OfferDrawer } from './OfferDrawer'
 import { OfferList } from './OfferList'
 import { matchesSearch } from './offerStatus'
 import { OffersToolbar, type ViewMode } from './OffersToolbar'
 import { Shell } from './Shell'
 import { useOffers } from './useOffers'
+
+type Selection = { offer: JobOffer; mode: 'drawer' | 'detail' }
 
 export default function App() {
   const [me, setMe] = useState<Me | null | undefined>(undefined)
@@ -18,7 +21,7 @@ export default function App() {
   const [to, setTo] = useState('')
   const [search, setSearch] = useState('')
   const [view, setView] = useState<ViewMode>('kanban')
-  const [selected, setSelected] = useState<JobOffer | null>(null)
+  const [selection, setSelection] = useState<Selection | null>(null)
   const [bootError, setBootError] = useState<string | null>(null)
   const [statusError, setStatusError] = useState<string | null>(null)
 
@@ -55,12 +58,20 @@ export default function App() {
     }
   }, [])
 
+  function syncOffer(updated: JobOffer | null) {
+    if (!updated) return
+    setSelection((cur) => (cur?.offer.id === updated.id ? { ...cur, offer: updated } : cur))
+  }
+
+  function handleOwnerChange(id: string) {
+    setOwnerUserId(id)
+    setSelection(null)
+  }
+
   function handleStatusChange(status: OfferStatus, id: string) {
     setStatusError(null)
     moveOffer(status, id)
-      .then((updated) => {
-        if (updated) setSelected((cur) => (cur?.id === updated.id ? updated : cur))
-      })
+      .then(syncOffer)
       .catch((err: unknown) => {
         console.error(err)
         setStatusError(err instanceof Error ? err.message : 'Failed to update status')
@@ -72,12 +83,32 @@ export default function App() {
   }
   if (me === null) return <LoginScreen />
 
+  if (selection?.mode === 'detail') {
+    return (
+      <Shell
+        me={me}
+        users={users}
+        ownerUserId={ownerUserId}
+        onOwnerChange={handleOwnerChange}
+        search={search}
+        onSearchChange={setSearch}
+      >
+        {statusError && <p className="px-5 pt-2 text-sm text-red-700">{statusError}</p>}
+        <OfferDetail
+          offer={selection.offer}
+          onBack={() => setSelection(null)}
+          onStatusChange={(status) => handleStatusChange(status, selection.offer.id)}
+        />
+      </Shell>
+    )
+  }
+
   return (
     <Shell
       me={me}
       users={users}
       ownerUserId={ownerUserId}
-      onOwnerChange={setOwnerUserId}
+      onOwnerChange={handleOwnerChange}
       search={search}
       onSearchChange={setSearch}
     >
@@ -104,12 +135,26 @@ export default function App() {
       />
 
       {view === 'kanban' ? (
-        <Board offers={filtered} onSelect={setSelected} onStatusChange={handleStatusChange} />
+        <Board
+          offers={filtered}
+          onSelect={(offer) => setSelection({ offer, mode: 'drawer' })}
+          onStatusChange={handleStatusChange}
+        />
       ) : (
-        <OfferList offers={filtered} onSelect={setSelected} onStatusChange={handleStatusChange} />
+        <OfferList
+          offers={filtered}
+          onSelect={(offer) => setSelection({ offer, mode: 'drawer' })}
+          onStatusChange={handleStatusChange}
+        />
       )}
 
-      {selected && <OfferDrawer offer={selected} onClose={() => setSelected(null)} />}
+      {selection?.mode === 'drawer' && (
+        <OfferDrawer
+          offer={selection.offer}
+          onClose={() => setSelection(null)}
+          onOpenFull={() => setSelection({ offer: selection.offer, mode: 'detail' })}
+        />
+      )}
     </Shell>
   )
 }

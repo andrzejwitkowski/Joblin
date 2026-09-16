@@ -1,9 +1,17 @@
 import { useEffect, useId, useRef } from 'react'
 import type { JobOffer } from './api'
-
 import { STATUS_META } from './offerStatus'
+import { OfferSectionsPreview } from './offerSections'
 
-export function OfferDrawer({ offer, onClose }: { offer: JobOffer; onClose: () => void }) {
+export function OfferDrawer({
+  offer,
+  onClose,
+  onOpenFull,
+}: {
+  offer: JobOffer
+  onClose: () => void
+  onOpenFull: () => void
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
   const previouslyFocused = useRef<HTMLElement | null>(null)
@@ -45,28 +53,29 @@ export function OfferDrawer({ offer, onClose }: { offer: JobOffer; onClose: () =
           {offer.title}
         </h2>
         <p className="mt-1 text-slate-500">{offer.company}</p>
-        {offer.salary && <p className="mt-3 text-sm font-semibold text-slate-800">{offer.salary}</p>}
-        <a
-          className="mt-3 inline-block text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
-          href={offer.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Otwórz źródło
-        </a>
-        <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-slate-700">{offer.description}</p>
-        {offer.tags.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {offer.tags.map((t) => (
-              <span
-                key={t}
-                className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
+        {(offer.salary || offer.location) && (
+          <p className="mt-3 text-sm font-semibold text-slate-800">
+            {[offer.salary, offer.location].filter(Boolean).join(' · ')}
+          </p>
         )}
+        <div className="mt-3 flex flex-wrap gap-3">
+          <a
+            className="inline-block text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
+            href={offer.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Otwórz źródło
+          </a>
+          <button
+            type="button"
+            className="text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
+            onClick={onOpenFull}
+          >
+            Pełny widok
+          </button>
+        </div>
+        <OfferSectionsPreview offer={offer} />
         <dl className="mt-6 space-y-1 text-xs text-slate-500">
           <div>Status oferty: {STATUS_META[offer.status].label}</div>
           <div>Źródło: {offer.sourceBot}</div>
