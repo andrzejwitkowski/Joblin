@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import type { JobOffer } from './api'
+import { STATUS_META } from './offerStatus'
 import { OfferSectionsPreview } from './offerSections'
 
 export function OfferDrawer({
@@ -29,7 +30,7 @@ export function OfferDrawer({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-20 m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 open:flex open:justify-end"
+      className="fixed inset-0 z-40 m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 open:flex open:justify-end"
       aria-labelledby={titleId}
       onClose={onClose}
       onClick={(e) => {
@@ -37,40 +38,49 @@ export function OfferDrawer({
       }}
     >
       <aside
-        className="h-full w-full max-w-md overflow-y-auto border-l border-[var(--line)] bg-[var(--paper)] p-5 shadow-xl"
+        className="h-full w-full max-w-md overflow-y-auto border-l border-slate-200 bg-white p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="mb-4 text-sm text-[var(--muted)]" onClick={onClose} autoFocus>
-          Close
+        <button
+          type="button"
+          className="mb-4 text-sm text-slate-500 hover:text-slate-800"
+          onClick={onClose}
+          autoFocus
+        >
+          Zamknij
         </button>
-        <h2 id={titleId} className="text-2xl font-semibold">
+        <h2 id={titleId} className="text-2xl font-semibold text-slate-900">
           {offer.title}
         </h2>
-        <p className="mt-1 text-[var(--muted)]">{offer.company}</p>
+        <p className="mt-1 text-slate-500">{offer.company}</p>
         {(offer.salary || offer.location) && (
-          <p className="mt-2 text-sm text-[var(--muted)]">
+          <p className="mt-3 text-sm font-semibold text-slate-800">
             {[offer.salary, offer.location].filter(Boolean).join(' · ')}
           </p>
         )}
         <div className="mt-3 flex flex-wrap gap-3">
           <a
-            className="inline-block text-sm text-[var(--accent)] underline"
+            className="inline-block text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
             href={offer.sourceUrl}
             target="_blank"
             rel="noreferrer"
           >
-            Open source
+            Otwórz źródło
           </a>
-          <button type="button" className="text-sm font-medium text-[var(--accent)] underline" onClick={onOpenFull}>
-            Full view
+          <button
+            type="button"
+            className="text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
+            onClick={onOpenFull}
+          >
+            Pełny widok
           </button>
         </div>
         <OfferSectionsPreview offer={offer} />
-        <dl className="mt-6 space-y-1 text-xs text-[var(--muted)]">
-          <div>Status: {offer.status}</div>
-          <div>Source: {offer.sourceBot}</div>
-          <div>Found: {new Date(offer.foundAt).toLocaleString()}</div>
-          <div>Updated: {new Date(offer.updatedAt).toLocaleString()}</div>
+        <dl className="mt-6 space-y-1 text-xs text-slate-500">
+          <div>Status oferty: {STATUS_META[offer.status].label}</div>
+          <div>Źródło: {offer.sourceBot}</div>
+          <div>Znaleziono: {new Date(offer.foundAt).toLocaleString('pl-PL')}</div>
+          <div>Aktualizacja: {new Date(offer.updatedAt).toLocaleString('pl-PL')}</div>
         </dl>
       </aside>
     </dialog>

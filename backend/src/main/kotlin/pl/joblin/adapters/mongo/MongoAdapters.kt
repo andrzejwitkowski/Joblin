@@ -118,7 +118,11 @@ class MongoJobOfferRepository(
     override fun upsertIngest(offer: JobOffer): UpsertResult {
         val existing = findByOwnerAndSourceUrl(offer.ownerUserId, offer.sourceUrl)
         return if (existing == null) {
-            UpsertResult(save(offer), created = true)
+            // Nowy dokument musi miec version = null: z niepustym @Version MongoTemplate.save()
+            // wykonuje update z optimistic-lockiem zamiast insertu i rzuca
+            // OptimisticLockingFailureException ("Cannot save entity ... Has it been modified meanwhile"),
+            // czyli ingest nowej oferty konczy sie 500.
+            UpsertResult(mongo.save(offer.toDoc().copy(version = null)).toDomain(), created = true)
         } else {
             UpsertResult(save(existing.withIngestedContent(offer)), created = false)
         }

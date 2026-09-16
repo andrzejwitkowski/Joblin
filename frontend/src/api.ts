@@ -3,13 +3,6 @@ export type OfferStatus = 'NEW' | 'INTERESTED' | 'APPLIED' | 'NOT_FOR_ME'
 export type SourceBot = 'HERMES' | 'GROK'
 export type OfferTone = 'DEFAULT' | 'PRIMARY' | 'SECONDARY' | 'TERTIARY'
 
-export const OFFER_STATUSES: { value: OfferStatus; label: string }[] = [
-  { value: 'NEW', label: 'New' },
-  { value: 'INTERESTED', label: 'Interested' },
-  { value: 'APPLIED', label: 'Applied' },
-  { value: 'NOT_FOR_ME', label: 'Not for me' },
-]
-
 export type Me = {
   id: string
   email: string

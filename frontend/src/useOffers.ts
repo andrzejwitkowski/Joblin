@@ -33,10 +33,15 @@ export function useOffers(me: Me | null | undefined, ownerUserId: string, filter
     const offer = offers.find((o) => o.id === offerId)
     if (!offer || offer.status === status) return null
     const gen = ++mutateGen.current
-    const updated = await patchOfferStatus(offerId, status)
-    if (gen !== mutateGen.current) return updated
-    setOffers((prev) => prev.map((o) => (o.id === offerId ? updated : o)))
-    return updated
+    try {
+      const updated = await patchOfferStatus(offerId, status)
+      if (gen !== mutateGen.current) return updated
+      setOffers((prev) => prev.map((o) => (o.id === offerId ? updated : o)))
+      return updated
+    } catch (err) {
+      if (gen !== mutateGen.current) return null
+      throw err
+    }
   }
 
   return { offers, moveOffer }
