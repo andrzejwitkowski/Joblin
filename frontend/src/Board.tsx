@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Bot, BriefcaseBusiness } from 'lucide-react'
 import type { JobOffer, OfferStatus } from './api'
 
@@ -29,6 +30,14 @@ export function Board({
   onStatusChange: (status: OfferStatus, offerId: string) => void
 }) {
   const byStatus = groupByStatus(offers)
+  const draggingId = useRef<string | null>(null)
+
+  function handleDrop(e: React.DragEvent, status: OfferStatus) {
+    e.preventDefault()
+    const id = draggingId.current ?? (e.dataTransfer.getData('text/plain') || null)
+    draggingId.current = null
+    if (id) onStatusChange(status, id)
+  }
 
   return (
     <div className="grid flex-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -36,23 +45,35 @@ export function Board({
         <section
           key={col.status}
           className="flex min-h-[420px] flex-col rounded-lg border border-[var(--line)] bg-[var(--panel)]/70"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault()
-            const id = e.dataTransfer.getData('text/offer-id')
-            if (id) onStatusChange(col.status, id)
-          }}
         >
           <h2 className="border-b border-[var(--line)] px-3 py-2 text-sm font-medium tracking-wide">
             {col.label}
             <span className="ml-2 text-[var(--muted)]">{byStatus[col.status].length}</span>
           </h2>
-          <div className="flex flex-1 flex-col gap-2 p-2">
+          <div
+            className="flex flex-1 flex-col gap-2 p-2"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, col.status)}
+          >
             {byStatus[col.status].map((offer) => (
               <article
                 key={offer.id}
                 draggable
-                onDragStart={(e) => e.dataTransfer.setData('text/offer-id', offer.id)}
+                onDragStart={(e) => {
+                  const target = e.target as HTMLElement
+                  if (target.closest('select, button, label, option')) {
+                    e.preventDefault()
+                    return
+                  }
+                  draggingId.current = offer.id
+                  e.dataTransfer.effectAllowed = 'move'
+                  e.dataTransfer.setData('text/plain', offer.id)
+                }}
+                onDragEnd={() => {
+                  draggingId.current = null
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => handleDrop(e, col.status)}
                 className="rounded-md border border-[var(--line)] bg-white p-3 shadow-sm"
               >
                 <div className="mb-1 flex items-start justify-between gap-2">

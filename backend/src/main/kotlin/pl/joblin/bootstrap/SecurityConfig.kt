@@ -31,6 +31,7 @@ class SecurityConfig(
         http
             .csrf { csrf ->
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(SpaCsrfTokenRequestHandler())
                     .ignoringRequestMatchers(AntPathRequestMatcher("/ingest/**"))
             }
             .authorizeHttpRequests { auth ->

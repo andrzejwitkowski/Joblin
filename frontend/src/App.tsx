@@ -15,6 +15,7 @@ export default function App() {
   const [to, setTo] = useState('')
   const [selected, setSelected] = useState<JobOffer | null>(null)
   const [bootError, setBootError] = useState<string | null>(null)
+  const [statusError, setStatusError] = useState<string | null>(null)
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
 
@@ -56,6 +57,7 @@ export default function App() {
   return (
     <Shell me={me} users={users} ownerUserId={ownerUserId} onOwnerChange={setOwnerUserId}>
       {bootError && <p className="text-sm text-red-700">{bootError}</p>}
+      {statusError && <p className="text-sm text-red-700">{statusError}</p>}
       <div className="flex flex-wrap gap-3 text-sm">
         <label className="flex items-center gap-2">
           Source
@@ -82,13 +84,17 @@ export default function App() {
       <Board
         offers={offers}
         onSelect={setSelected}
-        onStatusChange={(status, id) =>
+        onStatusChange={(status, id) => {
+          setStatusError(null)
           moveOffer(status, id)
             .then((updated) => {
               if (updated) setSelected((cur) => (cur?.id === updated.id ? updated : cur))
             })
-            .catch(console.error)
-        }
+            .catch((err: unknown) => {
+              console.error(err)
+              setStatusError(err instanceof Error ? err.message : 'Failed to update status')
+            })
+        }}
       />
 
       {selected && <OfferDrawer offer={selected} onClose={() => setSelected(null)} />}
