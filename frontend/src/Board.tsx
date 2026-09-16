@@ -57,7 +57,6 @@ export function Board({
                     onEndDrag={() => {
                       draggingId.current = null
                     }}
-                    onDrop={(e) => handleDrop(e, status)}
                   />
                 ))}
               </div>
@@ -75,14 +74,12 @@ function OfferCard({
   onStatusChange,
   onBeginDrag,
   onEndDrag,
-  onDrop,
 }: {
   offer: JobOffer
   onSelect: (offer: JobOffer) => void
   onStatusChange: (status: OfferStatus, offerId: string) => void
   onBeginDrag: (id: string) => void
   onEndDrag: () => void
-  onDrop: (e: React.DragEvent) => void
 }) {
   const rejected = offer.status === 'NOT_FOR_ME'
   return (
@@ -99,7 +96,6 @@ function OfferCard({
       }}
       onDragEnd={onEndDrag}
       onDragOver={(e) => e.preventDefault()}
-      onDrop={onDrop}
       className={`group cursor-grab rounded-xl border bg-white p-3.5 shadow-[var(--shadow-card)] transition duration-200 hover:shadow-[var(--shadow-card-hover)] ${
         rejected ? 'border-slate-200 opacity-80 hover:opacity-100' : 'border-slate-200/90'
       }`}

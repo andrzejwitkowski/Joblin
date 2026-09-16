@@ -79,6 +79,7 @@ export function Shell({
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pr-12 pl-9 text-xs placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[var(--brand)] focus:outline-none"
                 placeholder="Szukaj ofert, firm, technologii..."
                 type="search"
+                aria-label="Szukaj ofert"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
