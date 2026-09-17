@@ -5,7 +5,7 @@ import { LoginScreen } from './LoginScreen'
 import { OfferDetail } from './OfferDetail'
 import { OfferDrawer } from './OfferDrawer'
 import { OfferList } from './OfferList'
-import { matchesSearch } from './offerStatus'
+import { matchesSearch, visibleOffers } from './offerStatus'
 import { OffersToolbar, type ViewMode } from './OffersToolbar'
 import { Shell } from './Shell'
 import { useOffers } from './useOffers'
@@ -26,7 +26,7 @@ export default function App() {
   const [statusError, setStatusError] = useState<string | null>(null)
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
-  const filtered = offers.filter((o) => matchesSearch(o, search))
+  const filtered = visibleOffers(offers).filter((o) => matchesSearch(o, search))
 
   useEffect(() => {
     let cancelled = false

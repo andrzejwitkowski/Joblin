@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import type { JobOffer, OfferStatus } from './api'
-import { groupByStatus, OFFER_STATUSES, STATUS_META } from './offerStatus'
+import { fadeOpacity, groupByStatus, isTerminal, OFFER_STATUSES, STATUS_META } from './offerStatus'
 import { relativeTime } from './relativeTime'
 import { SourceBotIcon } from './SourceBotIcon'
 import { StatusSelect } from './StatusSelect'
@@ -81,7 +81,8 @@ function OfferCard({
   onBeginDrag: (id: string) => void
   onEndDrag: () => void
 }) {
-  const rejected = offer.status === 'NOT_FOR_ME'
+  const rejected = isTerminal(offer.status)
+  const opacity = rejected ? fadeOpacity(offer.fadeStartedAt) : 1
   return (
     <article
       draggable
@@ -96,9 +97,8 @@ function OfferCard({
       }}
       onDragEnd={onEndDrag}
       onDragOver={(e) => e.preventDefault()}
-      className={`group cursor-grab rounded-xl border bg-white p-3.5 shadow-[var(--shadow-card)] transition duration-200 hover:shadow-[var(--shadow-card-hover)] ${
-        rejected ? 'border-slate-200 opacity-80 hover:opacity-100' : 'border-slate-200/90'
-      }`}
+      style={rejected ? { opacity } : undefined}
+      className="group cursor-grab rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[var(--shadow-card)] transition duration-200 hover:shadow-[var(--shadow-card-hover)]"
     >
       <div className="flex items-start justify-between gap-2">
         <div>

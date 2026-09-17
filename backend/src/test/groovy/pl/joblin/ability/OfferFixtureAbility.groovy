@@ -31,7 +31,10 @@ trait OfferFixtureAbility {
             .withSourceBot((args.sourceBot ?: SourceBot.HERMES) as SourceBot)
             .withStatus((args.status ?: OfferStatus.NEW) as OfferStatus)
             .withFoundAt(foundAt)
-            .withUpdatedAt(foundAt)
+            .withUpdatedAt((args.updatedAt ?: foundAt) as Instant)
+            .withIsDeleted((args.isDeleted ?: false) as boolean)
+            .withDeletedAt(args.deletedAt as Instant)
+            .withFadeStartedAt(args.fadeStartedAt as Instant)
             .build()
         offers.save(offer)
     }

@@ -3,6 +3,7 @@ package pl.joblin.application
 import pl.joblin.domain.Clock
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
+import pl.joblin.domain.OfferFade
 import pl.joblin.domain.OfferFilter
 import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.Role
@@ -11,7 +12,36 @@ import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
 import java.time.Instant
 
-class ListOffers(private val offers: JobOfferRepository) {
+class SoftDeleteExpiredOffers(
+    private val offers: JobOfferRepository,
+    private val clock: Clock,
+) {
+    /** Soft-deletes expired terminal offers. When [ownerUserId] is set, scopes to that owner. */
+    fun execute(ownerUserId: String? = null): Int {
+        val now = clock.now()
+        val cutoff = now.minus(OfferFade.DURATION)
+        var deleted = 0
+        for (offer in offers.findTerminalNonDeleted(ownerUserId)) {
+            val start = offer.fadeStartedAt ?: offer.updatedAt
+            val withStart =
+                if (offer.fadeStartedAt == null) {
+                    offers.save(offer.copy(fadeStartedAt = start))
+                } else {
+                    offer
+                }
+            if (!start.isAfter(cutoff)) {
+                offers.save(withStart.copy(isDeleted = true, deletedAt = now, updatedAt = now))
+                deleted++
+            }
+        }
+        return deleted
+    }
+}
+
+class ListOffers(
+    private val offers: JobOfferRepository,
+    private val softDelete: SoftDeleteExpiredOffers,
+) {
     fun execute(
         actor: User,
         ownerUserId: String?,
@@ -24,6 +54,7 @@ class ListOffers(private val offers: JobOfferRepository) {
             actor.role == Role.ADMIN -> ownerUserId ?: throw ForbiddenException("ownerUserId required for admin")
             else -> actor.id
         }
+        softDelete.execute(owner)
         return offers.findByFilter(OfferFilter(owner, status, sourceBot, from, to))
     }
 }
@@ -40,7 +71,15 @@ class UpdateOfferStatus(
     fun execute(actor: User, id: String, status: OfferStatus): JobOffer =
         conflicts.execute {
             val offer = offers.requireAccessible(actor, id)
-            offers.save(offer.copy(status = status, updatedAt = clock.now()))
+            val now = clock.now()
+            val fadeStartedAt = if (OfferFade.isTerminal(status)) now else null
+            offers.save(
+                offer.copy(
+                    status = status,
+                    updatedAt = now,
+                    fadeStartedAt = fadeStartedAt,
+                ),
+            )
         }
 }
 

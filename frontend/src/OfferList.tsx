@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { JobOffer, OfferStatus } from './api'
-import { countByStatus, OFFER_STATUSES, STATUS_META } from './offerStatus'
+import { countByStatus, fadeOpacity, isTerminal, OFFER_STATUSES, STATUS_META } from './offerStatus'
 import { relativeTime } from './relativeTime'
 import { SourceBotIcon } from './SourceBotIcon'
 import { StatusSelect } from './StatusSelect'
@@ -78,9 +78,13 @@ function OfferRow({
   onSelect: (offer: JobOffer) => void
   onStatusChange: (status: OfferStatus, offerId: string) => void
 }) {
-  const rejected = offer.status === 'NOT_FOR_ME'
+  const rejected = isTerminal(offer.status)
+  const opacity = rejected ? fadeOpacity(offer.fadeStartedAt) : 1
   return (
-    <tr className={`hover:bg-slate-50 ${rejected ? 'bg-slate-50/50 opacity-75' : ''}`}>
+    <tr
+      style={rejected ? { opacity } : undefined}
+      className={`hover:bg-slate-50 ${rejected ? 'bg-slate-50/50' : ''}`}
+    >
       <td className="px-4 py-3.5">
         <div className="flex items-start gap-2.5">
           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xs font-bold text-blue-700">

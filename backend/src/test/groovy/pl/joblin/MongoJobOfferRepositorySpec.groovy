@@ -69,7 +69,8 @@ class MongoJobOfferRepositorySpec extends Specification {
             existing.id, existing.ownerUserId, existing.sourceUrl, existing.title, existing.company,
             existing.description, existing.salary, existing.tags, existing.sourceBot, existing.status,
             existing.foundAt, existing.updatedAt, existing.version, existing.location, existing.workMode,
-            existing.employmentLabel, existing.schemaVersion, existing.sections
+            existing.employmentLabel, existing.schemaVersion, existing.sections,
+            existing.isDeleted, existing.deletedAt, existing.fadeStartedAt
         )
         1 * mongo.save(_ as OfferDocument) >> { OfferDocument doc ->
             assert doc.id == "offer-7"

@@ -6,6 +6,7 @@ import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Repository
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
+import pl.joblin.domain.OfferFade
 import pl.joblin.domain.OfferFilter
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
@@ -44,11 +45,18 @@ class InMemoryJobOfferRepository : JobOfferRepository {
     override fun findByFilter(filter: OfferFilter): List<JobOffer> =
         byId.values
             .filter { it.ownerUserId == filter.ownerUserId }
+            .filter { filter.includeDeleted || !it.isDeleted }
             .filter { filter.status == null || it.status == filter.status }
             .filter { filter.sourceBot == null || it.sourceBot == filter.sourceBot }
             .filter { filter.from == null || !it.foundAt.isBefore(filter.from) }
             .filter { filter.to == null || !it.foundAt.isAfter(filter.to) }
             .sortedByDescending { it.foundAt }
+
+    override fun findTerminalNonDeleted(ownerUserId: String?): List<JobOffer> =
+        byId.values
+            .filter { !it.isDeleted && OfferFade.isTerminal(it.status) }
+            .filter { ownerUserId == null || it.ownerUserId == ownerUserId }
+            .toList()
 
     override fun save(offer: JobOffer): JobOffer {
         val existing = byId[offer.id]

@@ -54,12 +54,16 @@ class JobOfferBuilder {
     String employmentLabel = null
     int schemaVersion = 1
     List sections = []
+    boolean isDeleted = false
+    Instant deletedAt = null
+    Instant fadeStartedAt = null
 
     JobOffer build() {
         new JobOffer(
             id, ownerUserId, sourceUrl, title, company, description,
             salary, tags, sourceBot, status, foundAt, updatedAt, version,
-            location, workMode, employmentLabel, schemaVersion, sections
+            location, workMode, employmentLabel, schemaVersion, sections,
+            isDeleted, deletedAt, fadeStartedAt
         )
     }
 }

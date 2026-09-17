@@ -21,6 +21,9 @@ data class JobOffer(
     val employmentLabel: String? = null,
     val schemaVersion: Int = OfferLimits.MAX_SCHEMA_VERSION,
     val sections: List<OfferSection> = emptyList(),
+    val isDeleted: Boolean = false,
+    val deletedAt: Instant? = null,
+    val fadeStartedAt: Instant? = null,
 )
 
 fun JobOffer.withIngestedContent(incoming: JobOffer): JobOffer = copy(

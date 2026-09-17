@@ -11,6 +11,7 @@ import pl.joblin.application.GetOffer
 import pl.joblin.application.IngestOffer
 import pl.joblin.application.ListOffers
 import pl.joblin.application.ListUsers
+import pl.joblin.application.SoftDeleteExpiredOffers
 import pl.joblin.application.UpdateOfferStatus
 import pl.joblin.domain.Clock
 import pl.joblin.domain.IdProvider
@@ -49,7 +50,12 @@ class AppConfig {
     ) = IngestOffer(users, offers, clock, ids, conflicts)
 
     @Bean
-    fun listOffers(offers: JobOfferRepository) = ListOffers(offers)
+    fun softDeleteExpiredOffers(offers: JobOfferRepository, clock: Clock) =
+        SoftDeleteExpiredOffers(offers, clock)
+
+    @Bean
+    fun listOffers(offers: JobOfferRepository, softDelete: SoftDeleteExpiredOffers) =
+        ListOffers(offers, softDelete)
 
     @Bean
     fun getOffer(offers: JobOfferRepository) = GetOffer(offers)

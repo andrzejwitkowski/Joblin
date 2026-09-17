@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Repository
 import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
+import pl.joblin.domain.OfferFade
 import pl.joblin.domain.OfferFilter
 import pl.joblin.domain.OfferLimits
 import pl.joblin.domain.OfferSection
@@ -57,6 +58,9 @@ data class OfferDocument(
     val employmentLabel: String? = null,
     val schemaVersion: Int = OfferLimits.MAX_SCHEMA_VERSION,
     val sections: List<OfferSection> = emptyList(),
+    val isDeleted: Boolean = false,
+    val deletedAt: Instant? = null,
+    val fadeStartedAt: Instant? = null,
 )
 
 @Repository
@@ -100,6 +104,12 @@ class MongoJobOfferRepository(
 
     override fun findByFilter(filter: OfferFilter): List<JobOffer> {
         val criteria = mutableListOf(Criteria.where("ownerUserId").`is`(filter.ownerUserId))
+        if (!filter.includeDeleted) {
+            criteria += Criteria().orOperator(
+                Criteria.where("isDeleted").`is`(false),
+                Criteria.where("isDeleted").exists(false),
+            )
+        }
         filter.status?.let { criteria += Criteria.where("status").`is`(it) }
         filter.sourceBot?.let { criteria += Criteria.where("sourceBot").`is`(it) }
         filter.from?.let { criteria += Criteria.where("foundAt").gte(it) }
@@ -107,6 +117,19 @@ class MongoJobOfferRepository(
 
         val query = Query(Criteria().andOperator(*criteria.toTypedArray()))
             .with(Sort.by(Sort.Direction.DESC, "foundAt"))
+        return mongo.find(query, OfferDocument::class.java).map { it.toDomain() }
+    }
+
+    override fun findTerminalNonDeleted(ownerUserId: String?): List<JobOffer> {
+        val criteria = mutableListOf(
+            Criteria.where("status").`in`(OfferFade.TERMINAL),
+            Criteria().orOperator(
+                Criteria.where("isDeleted").`is`(false),
+                Criteria.where("isDeleted").exists(false),
+            ),
+        )
+        ownerUserId?.let { criteria += Criteria.where("ownerUserId").`is`(it) }
+        val query = Query(Criteria().andOperator(*criteria.toTypedArray()))
         return mongo.find(query, OfferDocument::class.java).map { it.toDomain() }
     }
 
@@ -155,6 +178,9 @@ private fun OfferDocument.toDomain() =
         employmentLabel = employmentLabel,
         schemaVersion = schemaVersion,
         sections = sections,
+        isDeleted = isDeleted,
+        deletedAt = deletedAt,
+        fadeStartedAt = fadeStartedAt,
     )
 
 private fun JobOffer.toDoc() =
@@ -177,4 +203,7 @@ private fun JobOffer.toDoc() =
         employmentLabel = employmentLabel,
         schemaVersion = schemaVersion,
         sections = sections,
+        isDeleted = isDeleted,
+        deletedAt = deletedAt,
+        fadeStartedAt = fadeStartedAt,
     )
