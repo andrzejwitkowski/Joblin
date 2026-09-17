@@ -21,6 +21,9 @@ data class JobOffer(
     val employmentLabel: String? = null,
     val schemaVersion: Int = OfferLimits.MAX_SCHEMA_VERSION,
     val sections: List<OfferSection> = emptyList(),
+    val isDeleted: Boolean = false,
+    val deletedAt: Instant? = null,
+    val fadeStartedAt: Instant? = null,
 )
 
 fun JobOffer.withIngestedContent(incoming: JobOffer): JobOffer = copy(
@@ -38,3 +41,15 @@ fun JobOffer.withIngestedContent(incoming: JobOffer): JobOffer = copy(
     schemaVersion = incoming.schemaVersion,
     sections = incoming.sections,
 )
+
+/** Apply ingest payload; soft-deleted rows revive as NEW so the same URL can reappear. */
+fun JobOffer.forIngestUpdate(incoming: JobOffer): JobOffer {
+    val refreshed = withIngestedContent(incoming)
+    if (!isDeleted) return refreshed
+    return refreshed.copy(
+        isDeleted = false,
+        deletedAt = null,
+        fadeStartedAt = null,
+        status = OfferStatus.NEW,
+    )
+}

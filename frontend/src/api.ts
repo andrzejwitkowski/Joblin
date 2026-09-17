@@ -1,5 +1,5 @@
 export type Role = 'USER' | 'ADMIN'
-export type OfferStatus = 'NEW' | 'INTERESTED' | 'APPLIED' | 'NOT_FOR_ME'
+export type OfferStatus = 'NEW' | 'INTERESTED' | 'APPLIED' | 'NOT_FOR_ME' | 'CLOSED'
 export type SourceBot = 'HERMES' | 'GROK'
 export type OfferTone = 'DEFAULT' | 'PRIMARY' | 'SECONDARY' | 'TERTIARY'
 
@@ -96,6 +96,9 @@ export type JobOffer = {
   employmentLabel: string | null
   schemaVersion: number
   sections: OfferSection[]
+  isDeleted: boolean
+  deletedAt: string | null
+  fadeStartedAt: string | null
 }
 
 function csrfHeaders(): HeadersInit {

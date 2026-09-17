@@ -8,6 +8,7 @@ data class OfferFilter(
     val sourceBot: SourceBot? = null,
     val from: Instant? = null,
     val to: Instant? = null,
+    val includeDeleted: Boolean = false,
 )
 
 data class UpsertResult(
@@ -19,6 +20,8 @@ interface JobOfferRepository {
     fun findById(id: String): JobOffer?
     fun findByOwnerAndSourceUrl(ownerUserId: String, sourceUrl: String): JobOffer?
     fun findByFilter(filter: OfferFilter): List<JobOffer>
+    /** Non-deleted offers in terminal (fadeable) statuses, optionally scoped to one owner. */
+    fun findTerminalNonDeleted(ownerUserId: String? = null): List<JobOffer>
     /** Persist with optimistic version check; throws OptimisticLockingFailureException on conflict. */
     fun save(offer: JobOffer): JobOffer
     /** Insert or refresh ingest fields; never overwrites existing status. Retries on version conflicts. */
