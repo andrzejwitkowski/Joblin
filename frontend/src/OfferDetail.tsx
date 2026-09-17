@@ -102,9 +102,7 @@ export function OfferDetail({
       </header>
 
       <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)] md:p-6 lg:col-span-8">
-          <OfferSectionsView offer={offer} />
-        </div>
+        <OfferSectionsView offer={offer} className="lg:col-span-8" />
         <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)] lg:col-span-4">
           <h3 className="mb-3 text-sm font-semibold text-slate-900">Metadane i źródło</h3>
           <dl className="space-y-3 text-sm">
