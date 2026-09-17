@@ -81,8 +81,8 @@ function OfferCard({
   onBeginDrag: (id: string) => void
   onEndDrag: () => void
 }) {
-  const rejected = isTerminal(offer.status)
-  const opacity = rejected ? fadeOpacity(offer.fadeStartedAt) : 1
+  const terminal = isTerminal(offer.status)
+  const opacity = terminal ? fadeOpacity(offer.fadeStartedAt) : 1
   return (
     <article
       draggable
@@ -97,7 +97,7 @@ function OfferCard({
       }}
       onDragEnd={onEndDrag}
       onDragOver={(e) => e.preventDefault()}
-      style={rejected ? { opacity } : undefined}
+      style={terminal ? { opacity } : undefined}
       className="group cursor-grab rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[var(--shadow-card)] transition duration-200 hover:shadow-[var(--shadow-card-hover)]"
     >
       <div className="flex items-start justify-between gap-2">
@@ -107,7 +107,7 @@ function OfferCard({
           </span>
           <h3
             className={`text-sm leading-snug font-semibold group-hover:text-[var(--brand)] ${
-              rejected ? 'text-slate-700 line-through' : 'text-slate-900'
+              terminal ? 'text-slate-700 line-through' : 'text-slate-900'
             }`}
           >
             <button type="button" className="cursor-pointer text-left" onClick={() => onSelect(offer)}>
@@ -121,7 +121,7 @@ function OfferCard({
       </div>
 
       {offer.salary && (
-        <p className={`mt-2.5 border-t border-slate-100 pt-2 text-xs font-bold ${rejected ? 'text-slate-500 line-through' : 'text-slate-800'}`}>
+        <p className={`mt-2.5 border-t border-slate-100 pt-2 text-xs font-bold ${terminal ? 'text-slate-500 line-through' : 'text-slate-800'}`}>
           {offer.salary}
         </p>
       )}
@@ -141,7 +141,7 @@ function OfferCard({
           <span className="text-[11px] font-medium text-slate-400">Status:</span>
           <StatusSelect offer={offer} onStatusChange={onStatusChange} />
         </label>
-        {rejected ? (
+        {terminal ? (
           <button
             type="button"
             className="text-xs text-slate-400 underline hover:text-slate-600"

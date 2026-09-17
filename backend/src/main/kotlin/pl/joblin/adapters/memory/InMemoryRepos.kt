@@ -8,6 +8,7 @@ import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.OfferFade
 import pl.joblin.domain.OfferFilter
+import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
@@ -86,7 +87,19 @@ class InMemoryJobOfferRepository : JobOfferRepository {
         return if (existing == null) {
             UpsertResult(save(offer), created = true)
         } else {
-            UpsertResult(save(existing.withIngestedContent(offer)), created = false)
+            val merged = existing.withIngestedContent(offer).let { refreshed ->
+                if (!existing.isDeleted) {
+                    refreshed
+                } else {
+                    refreshed.copy(
+                        isDeleted = false,
+                        deletedAt = null,
+                        fadeStartedAt = null,
+                        status = OfferStatus.NEW,
+                    )
+                }
+            }
+            UpsertResult(save(merged), created = false)
         }
     }
 

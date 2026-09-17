@@ -104,12 +104,7 @@ class MongoJobOfferRepository(
 
     override fun findByFilter(filter: OfferFilter): List<JobOffer> {
         val criteria = mutableListOf(Criteria.where("ownerUserId").`is`(filter.ownerUserId))
-        if (!filter.includeDeleted) {
-            criteria += Criteria().orOperator(
-                Criteria.where("isDeleted").`is`(false),
-                Criteria.where("isDeleted").exists(false),
-            )
-        }
+        if (!filter.includeDeleted) criteria += notDeletedCriteria()
         filter.status?.let { criteria += Criteria.where("status").`is`(it) }
         filter.sourceBot?.let { criteria += Criteria.where("sourceBot").`is`(it) }
         filter.from?.let { criteria += Criteria.where("foundAt").gte(it) }
@@ -123,10 +118,7 @@ class MongoJobOfferRepository(
     override fun findTerminalNonDeleted(ownerUserId: String?): List<JobOffer> {
         val criteria = mutableListOf(
             Criteria.where("status").`in`(OfferFade.TERMINAL),
-            Criteria().orOperator(
-                Criteria.where("isDeleted").`is`(false),
-                Criteria.where("isDeleted").exists(false),
-            ),
+            notDeletedCriteria(),
         )
         ownerUserId?.let { criteria += Criteria.where("ownerUserId").`is`(it) }
         val query = Query(Criteria().andOperator(*criteria.toTypedArray()))
@@ -147,10 +139,28 @@ class MongoJobOfferRepository(
             // czyli ingest nowej oferty konczy sie 500.
             UpsertResult(mongo.save(offer.toDoc().copy(version = null)).toDomain(), created = true)
         } else {
-            UpsertResult(save(existing.withIngestedContent(offer)), created = false)
+            val merged = existing.withIngestedContent(offer).let { refreshed ->
+                if (!existing.isDeleted) {
+                    refreshed
+                } else {
+                    refreshed.copy(
+                        isDeleted = false,
+                        deletedAt = null,
+                        fadeStartedAt = null,
+                        status = OfferStatus.NEW,
+                    )
+                }
+            }
+            UpsertResult(save(merged), created = false)
         }
     }
 }
+
+private fun notDeletedCriteria(): Criteria =
+    Criteria().orOperator(
+        Criteria.where("isDeleted").`is`(false),
+        Criteria.where("isDeleted").exists(false),
+    )
 
 private fun UserDocument.toDomain() =
     User(id, email, displayName, role, apiKeyId, apiKeyHash, createdAt)

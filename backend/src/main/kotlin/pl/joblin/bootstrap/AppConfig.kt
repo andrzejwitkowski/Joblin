@@ -50,8 +50,11 @@ class AppConfig {
     ) = IngestOffer(users, offers, clock, ids, conflicts)
 
     @Bean
-    fun softDeleteExpiredOffers(offers: JobOfferRepository, clock: Clock) =
-        SoftDeleteExpiredOffers(offers, clock)
+    fun softDeleteExpiredOffers(
+        offers: JobOfferRepository,
+        clock: Clock,
+        conflicts: ConflictRetry,
+    ) = SoftDeleteExpiredOffers(offers, clock, conflicts)
 
     @Bean
     fun listOffers(offers: JobOfferRepository, softDelete: SoftDeleteExpiredOffers) =

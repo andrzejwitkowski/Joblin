@@ -78,12 +78,12 @@ function OfferRow({
   onSelect: (offer: JobOffer) => void
   onStatusChange: (status: OfferStatus, offerId: string) => void
 }) {
-  const rejected = isTerminal(offer.status)
-  const opacity = rejected ? fadeOpacity(offer.fadeStartedAt) : 1
+  const terminal = isTerminal(offer.status)
+  const opacity = terminal ? fadeOpacity(offer.fadeStartedAt) : 1
   return (
     <tr
-      style={rejected ? { opacity } : undefined}
-      className={`hover:bg-slate-50 ${rejected ? 'bg-slate-50/50' : ''}`}
+      style={terminal ? { opacity } : undefined}
+      className={`hover:bg-slate-50 ${terminal ? 'bg-slate-50/50' : ''}`}
     >
       <td className="px-4 py-3.5">
         <div className="flex items-start gap-2.5">
@@ -95,7 +95,7 @@ function OfferRow({
               <button
                 type="button"
                 className={`leading-tight font-bold hover:text-[var(--brand)] ${
-                  rejected ? 'text-slate-600 line-through' : 'text-slate-900'
+                  terminal ? 'text-slate-600 line-through' : 'text-slate-900'
                 }`}
                 onClick={() => onSelect(offer)}
               >
@@ -105,18 +105,18 @@ function OfferRow({
                 <SourceBotIcon bot={offer.sourceBot} size={14} />
               </span>
             </div>
-            <p className={`mt-0.5 text-[11px] ${rejected ? 'text-slate-400' : 'text-slate-500'}`}>{offer.company}</p>
+            <p className={`mt-0.5 text-[11px] ${terminal ? 'text-slate-400' : 'text-slate-500'}`}>{offer.company}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-3.5">
         <StatusSelect offer={offer} onStatusChange={onStatusChange} />
       </td>
-      <td className={`px-4 py-3.5 font-bold ${rejected ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+      <td className={`px-4 py-3.5 font-bold ${terminal ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
         {offer.salary ?? '—'}
       </td>
       <td className="px-4 py-3.5">
-        <div className={`flex flex-wrap gap-1 ${rejected ? 'opacity-70' : ''}`}>
+        <div className={`flex flex-wrap gap-1 ${terminal ? 'opacity-70' : ''}`}>
           {offer.tags.length === 0 && <span className="text-slate-400">—</span>}
           {offer.tags.slice(0, 5).map((t) => (
             <span key={t} className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700">
@@ -125,11 +125,11 @@ function OfferRow({
           ))}
         </div>
       </td>
-      <td className={`px-4 py-3.5 text-[11px] ${rejected ? 'text-slate-400' : 'text-slate-500'}`}>
+      <td className={`px-4 py-3.5 text-[11px] ${terminal ? 'text-slate-400' : 'text-slate-500'}`}>
         {relativeTime(offer.foundAt)}
       </td>
       <td className="px-4 py-3.5 text-right">
-        {rejected ? (
+        {terminal ? (
           <button
             type="button"
             className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-500 hover:text-slate-800"

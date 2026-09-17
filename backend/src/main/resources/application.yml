@@ -19,6 +19,7 @@ joblin:
   seed-users: []
   soft-delete:
     cron: "0 0 2 * * *"
+    zone: Europe/Warsaw
 
 logging:
   level:

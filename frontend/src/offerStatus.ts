@@ -4,7 +4,6 @@ export const OFFER_STATUSES: OfferStatus[] = ['NEW', 'INTERESTED', 'APPLIED', 'N
 
 export const TERMINAL_STATUSES: OfferStatus[] = ['NOT_FOR_ME', 'CLOSED']
 
-/** Full fade window: 3 days in ms. */
 export const FADE_MS = 3 * 24 * 60 * 60 * 1000
 
 export const STATUS_META: Record<
@@ -47,7 +46,7 @@ export function isTerminal(status: OfferStatus): boolean {
   return TERMINAL_STATUSES.includes(status)
 }
 
-/** Opacity 1 → 0.15 over FADE_MS; 0 when fully elapsed. */
+/** Linear fade 1 → 0.15 over FADE_MS; 0 once elapsed (hidden by isFadeGone). */
 export function fadeOpacity(fadeStartedAt: string | null | undefined, now = Date.now()): number {
   if (!fadeStartedAt) return 1
   const age = now - new Date(fadeStartedAt).getTime()
