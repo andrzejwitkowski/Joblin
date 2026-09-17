@@ -34,7 +34,7 @@ export function OfferDetail({
   onStatusChange: (status: OfferStatus) => void
 }) {
   return (
-    <div className="space-y-6 px-5 py-6">
+    <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-6 pb-10">
       <nav className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
         <button
           type="button"
