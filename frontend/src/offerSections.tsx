@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { JobOffer, OfferSection, OfferTone, PillItem, SpecItem, TitledItem } from './api'
 import { OfferIcon } from './offerIcons'
 
@@ -10,6 +11,10 @@ const TONE_DOT: Record<OfferTone, string> = {
 
 function truncate(text: string, max: number) {
   return text.length <= max ? text : `${text.slice(0, max - 1)}…`
+}
+
+function previewNarrative(paragraphs: string[], max = 360) {
+  return truncate(paragraphs.join('\n\n'), max)
 }
 
 function SectionTitle({ title, icon }: { title: string; icon?: string | null }) {
@@ -119,13 +124,17 @@ function LegacyBody({ offer }: { offer: JobOffer }) {
   )
 }
 
+function SectionCard({ children, className }: { children: ReactNode; className: string }) {
+  return <div className={`rounded-xl border border-slate-200 p-4 shadow-sm ${className}`}>{children}</div>
+}
+
 function FullSection({ section }: { section: OfferSection }) {
   switch (section.type) {
     case 'SPECS':
       return <SpecsGrid items={section.items} cols="grid-cols-2 sm:grid-cols-4" />
     case 'SOURCE':
       return (
-        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <SectionCard className="flex flex-col gap-3 bg-slate-50 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--brand)] shadow-sm">
               <OfferIcon name={section.icon ?? 'travel_explore'} size={20} />
@@ -160,33 +169,33 @@ function FullSection({ section }: { section: OfferSection }) {
               <OfferIcon name="open_in_new" size={14} />
             </a>
           </div>
-        </div>
+        </SectionCard>
       )
     case 'NARRATIVE':
       return (
-        <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <SectionCard className="space-y-3 bg-white">
           <SectionTitle title={section.title} icon={section.icon} />
           {section.paragraphs.map((p, i) => (
             <p key={i} className="text-sm leading-relaxed whitespace-pre-wrap text-slate-600">
               {p}
             </p>
           ))}
-        </div>
+        </SectionCard>
       )
     case 'PILLS':
       return (
-        <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <SectionCard className="space-y-3 bg-white">
           <SectionTitle title={section.title} icon={section.icon} />
           <PillChips items={section.items} showBadge />
-        </div>
+        </SectionCard>
       )
     case 'CHECKLIST':
     case 'CARDS':
       return (
-        <div className="space-y-3">
+        <SectionCard className="space-y-3 bg-white">
           <SectionTitle title={section.title} icon={section.icon} />
           <TitledGrid items={section.items} />
-        </div>
+        </SectionCard>
       )
   }
 }
@@ -211,8 +220,8 @@ function PreviewSection({ section }: { section: OfferSection }) {
       return (
         <div>
           <SectionTitle title={section.title} icon={section.icon} />
-          <p className="mt-1 text-sm leading-relaxed text-slate-600">
-            {truncate(section.paragraphs[0] ?? '', 180)}
+          <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap text-slate-600">
+            {previewNarrative(section.paragraphs)}
           </p>
         </div>
       )
@@ -234,10 +243,16 @@ function PreviewSection({ section }: { section: OfferSection }) {
   }
 }
 
-export function OfferSectionsView({ offer }: { offer: JobOffer }) {
-  if (offer.sections.length === 0) return <LegacyBody offer={offer} />
+export function OfferSectionsView({ offer, className }: { offer: JobOffer; className?: string }) {
+  if (offer.sections.length === 0) {
+    return (
+      <div className={className}>
+        <LegacyBody offer={offer} />
+      </div>
+    )
+  }
   return (
-    <div className="space-y-5">
+    <div className={['space-y-5', className].filter(Boolean).join(' ')}>
       {offer.sections.map((section, i) => (
         <FullSection key={`${section.type}-${i}`} section={section} />
       ))}
@@ -254,4 +269,9 @@ export function OfferSectionsPreview({ offer }: { offer: JobOffer }) {
       ))}
     </div>
   )
+}
+
+if (import.meta.env.DEV) {
+  console.assert(previewNarrative(['About Us:-', 'Body text here'], 20).startsWith('About Us:-'))
+  console.assert(previewNarrative(['Only one.'], 180) === 'Only one.')
 }
