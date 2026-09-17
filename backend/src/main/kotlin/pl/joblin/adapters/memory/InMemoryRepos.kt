@@ -8,7 +8,6 @@ import pl.joblin.domain.JobOffer
 import pl.joblin.domain.JobOfferRepository
 import pl.joblin.domain.OfferFade
 import pl.joblin.domain.OfferFilter
-import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository

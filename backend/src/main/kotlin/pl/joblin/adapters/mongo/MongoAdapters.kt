@@ -23,7 +23,6 @@ import pl.joblin.domain.SourceBot
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
-import pl.joblin.domain.withIngestedContent
 import pl.joblin.domain.forIngestUpdate
 import java.time.Instant
 
