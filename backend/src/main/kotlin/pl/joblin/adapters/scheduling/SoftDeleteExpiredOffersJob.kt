@@ -8,7 +8,7 @@ import pl.joblin.application.SoftDeleteExpiredOffers
 class SoftDeleteExpiredOffersJob(
     private val softDelete: SoftDeleteExpiredOffers,
 ) {
-    @Scheduled(cron = "0 0 2 * * *")
+    @Scheduled(cron = "\${joblin.soft-delete.cron}")
     fun runNightly() {
         softDelete.execute()
     }

@@ -17,6 +17,8 @@ spring:
 
 joblin:
   seed-users: []
+  soft-delete:
+    cron: "0 0 2 * * *"
 
 logging:
   level:
