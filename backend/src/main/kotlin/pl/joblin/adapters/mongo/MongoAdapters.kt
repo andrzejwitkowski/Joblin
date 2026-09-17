@@ -24,6 +24,7 @@ import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
 import pl.joblin.domain.withIngestedContent
+import pl.joblin.domain.forIngestUpdate
 import java.time.Instant
 
 @Document("users")
@@ -139,19 +140,7 @@ class MongoJobOfferRepository(
             // czyli ingest nowej oferty konczy sie 500.
             UpsertResult(mongo.save(offer.toDoc().copy(version = null)).toDomain(), created = true)
         } else {
-            val merged = existing.withIngestedContent(offer).let { refreshed ->
-                if (!existing.isDeleted) {
-                    refreshed
-                } else {
-                    refreshed.copy(
-                        isDeleted = false,
-                        deletedAt = null,
-                        fadeStartedAt = null,
-                        status = OfferStatus.NEW,
-                    )
-                }
-            }
-            UpsertResult(save(merged), created = false)
+            UpsertResult(save(existing.forIngestUpdate(offer)), created = false)
         }
     }
 }

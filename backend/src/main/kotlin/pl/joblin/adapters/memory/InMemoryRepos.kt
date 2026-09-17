@@ -12,7 +12,7 @@ import pl.joblin.domain.OfferStatus
 import pl.joblin.domain.UpsertResult
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
-import pl.joblin.domain.withIngestedContent
+import pl.joblin.domain.forIngestUpdate
 import java.util.concurrent.ConcurrentHashMap
 
 @Repository
@@ -87,19 +87,7 @@ class InMemoryJobOfferRepository : JobOfferRepository {
         return if (existing == null) {
             UpsertResult(save(offer), created = true)
         } else {
-            val merged = existing.withIngestedContent(offer).let { refreshed ->
-                if (!existing.isDeleted) {
-                    refreshed
-                } else {
-                    refreshed.copy(
-                        isDeleted = false,
-                        deletedAt = null,
-                        fadeStartedAt = null,
-                        status = OfferStatus.NEW,
-                    )
-                }
-            }
-            UpsertResult(save(merged), created = false)
+            UpsertResult(save(existing.forIngestUpdate(offer)), created = false)
         }
     }
 

@@ -41,3 +41,15 @@ fun JobOffer.withIngestedContent(incoming: JobOffer): JobOffer = copy(
     schemaVersion = incoming.schemaVersion,
     sections = incoming.sections,
 )
+
+/** Apply ingest payload; soft-deleted rows revive as NEW so the same URL can reappear. */
+fun JobOffer.forIngestUpdate(incoming: JobOffer): JobOffer {
+    val refreshed = withIngestedContent(incoming)
+    if (!isDeleted) return refreshed
+    return refreshed.copy(
+        isDeleted = false,
+        deletedAt = null,
+        fadeStartedAt = null,
+        status = OfferStatus.NEW,
+    )
+}
