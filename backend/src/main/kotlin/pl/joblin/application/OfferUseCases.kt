@@ -10,6 +10,7 @@ import pl.joblin.domain.Role
 import pl.joblin.domain.SourceBot
 import pl.joblin.domain.User
 import pl.joblin.domain.UserRepository
+import java.time.Instant
 
 class SoftDeleteExpiredOffers(
     private val offers: JobOfferRepository,
