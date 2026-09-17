@@ -5,7 +5,7 @@ import { LoginScreen } from './LoginScreen'
 import { OfferDetail } from './OfferDetail'
 import { OfferDrawer } from './OfferDrawer'
 import { OfferList } from './OfferList'
-import { matchesSearch, visibleOffers } from './offerStatus'
+import { FADE_MS, isTerminal, matchesSearch, visibleOffers } from './offerStatus'
 import { OffersToolbar, type ViewMode } from './OffersToolbar'
 import { Shell } from './Shell'
 import { useOffers } from './useOffers'
@@ -24,9 +24,20 @@ export default function App() {
   const [selection, setSelection] = useState<Selection | null>(null)
   const [bootError, setBootError] = useState<string | null>(null)
   const [statusError, setStatusError] = useState<string | null>(null)
+  const [now, setNow] = useState(() => Date.now())
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
-  const filtered = visibleOffers(offers).filter((o) => matchesSearch(o, search))
+  const filtered = visibleOffers(offers, now).filter((o) => matchesSearch(o, search))
+
+  useEffect(() => {
+    const nextEnds = offers
+      .filter((o) => !o.isDeleted && isTerminal(o.status) && o.fadeStartedAt)
+      .map((o) => new Date(o.fadeStartedAt!).getTime() + FADE_MS)
+      .filter((t) => t > Date.now())
+    if (nextEnds.length === 0) return
+    const id = window.setTimeout(() => setNow(Date.now()), Math.min(...nextEnds) - Date.now())
+    return () => window.clearTimeout(id)
+  }, [offers, now])
 
   useEffect(() => {
     let cancelled = false
