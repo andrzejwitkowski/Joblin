@@ -3,9 +3,9 @@ import type { JobOffer, OfferSection, OfferTone, PillItem, SpecItem, TitledItem 
 import { OfferIcon } from './offerIcons'
 
 const TONE_DOT: Record<OfferTone, string> = {
-  DEFAULT: 'bg-slate-400',
-  PRIMARY: 'bg-[var(--brand)]',
-  SECONDARY: 'bg-slate-800',
+  DEFAULT: 'bg-ink-muted',
+  PRIMARY: 'bg-brand',
+  SECONDARY: 'bg-ink',
   TERTIARY: 'bg-amber-500',
 }
 
@@ -19,9 +19,9 @@ function previewNarrative(paragraphs: string[], max = 360) {
 
 function SectionTitle({ title, icon }: { title: string; icon?: string | null }) {
   return (
-    <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight text-slate-900">
+    <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight text-ink">
       {icon && (
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[var(--brand)]">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-brand">
           <OfferIcon name={icon} size={16} />
         </span>
       )}
@@ -36,20 +36,20 @@ function SpecsGrid({ items, cols }: { items: SpecItem[]; cols: string }) {
       {items.map((item) => (
         <div
           key={`${item.label}:${item.value}`}
-          className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm"
+          className="rounded-xl border border-border bg-surface p-3.5 shadow-sm"
         >
           <div className="mb-2 flex items-center gap-2">
             {item.icon && (
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[var(--brand)]">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-brand">
                 <OfferIcon name={item.icon} size={15} />
               </span>
             )}
-            <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+            <span className="text-[10px] font-semibold tracking-wider text-ink-muted uppercase">
               {item.label}
             </span>
           </div>
-          <div className="text-sm font-semibold text-slate-900">{item.value}</div>
-          {item.hint && <span className="mt-0.5 block text-xs text-slate-500">{item.hint}</span>}
+          <div className="text-sm font-semibold text-ink">{item.value}</div>
+          {item.hint && <span className="mt-0.5 block text-xs text-ink-muted">{item.hint}</span>}
         </div>
       ))}
     </div>
@@ -62,16 +62,16 @@ function PillChips({ items, showBadge }: { items: PillItem[]; showBadge?: boolea
       {items.map((p) => (
         <span
           key={p.label}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 shadow-sm"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-ink shadow-sm"
         >
           {p.icon ? (
-            <OfferIcon name={p.icon} size={12} className="text-slate-500" />
+            <OfferIcon name={p.icon} size={12} className="text-ink-muted" />
           ) : (
             <span className={`h-1.5 w-1.5 rounded-full ${TONE_DOT[p.tone ?? 'DEFAULT']}`} aria-hidden />
           )}
           <span className={p.tone === 'PRIMARY' ? 'font-semibold' : undefined}>{p.label}</span>
           {showBadge && p.badge && (
-            <span className="rounded bg-blue-50 px-1 py-0.5 text-[10px] text-[var(--brand)]">{p.badge}</span>
+            <span className="rounded bg-blue-50 px-1 py-0.5 text-[10px] text-brand dark:bg-blue-950/50">{p.badge}</span>
           )}
         </span>
       ))}
@@ -85,17 +85,17 @@ function TitledGrid({ items }: { items: TitledItem[] }) {
       {items.map((item) => (
         <div
           key={item.title}
-          className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm"
+          className="rounded-xl border border-border bg-surface p-3.5 shadow-sm"
         >
           <div className="flex items-start gap-2">
             {item.icon && (
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[var(--brand)]">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-brand">
                 <OfferIcon name={item.icon} size={15} />
               </span>
             )}
             <div className="min-w-0">
-              <div className="text-sm font-semibold text-slate-900">{item.title}</div>
-              {item.body && <p className="mt-1 text-xs leading-relaxed text-slate-500">{item.body}</p>}
+              <div className="text-sm font-semibold text-ink">{item.title}</div>
+              {item.body && <p className="mt-1 text-xs leading-relaxed text-ink-muted">{item.body}</p>}
             </div>
           </div>
         </div>
@@ -107,13 +107,13 @@ function TitledGrid({ items }: { items: TitledItem[] }) {
 function LegacyBody({ offer }: { offer: JobOffer }) {
   return (
     <>
-      <p className="text-sm leading-relaxed whitespace-pre-wrap text-slate-700">{offer.description}</p>
+      <p className="text-sm leading-relaxed whitespace-pre-wrap text-ink">{offer.description}</p>
       {offer.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {offer.tags.map((t) => (
             <span
               key={t}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700"
+              className="rounded-lg border border-border bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink"
             >
               {t}
             </span>
@@ -125,7 +125,7 @@ function LegacyBody({ offer }: { offer: JobOffer }) {
 }
 
 function SectionCard({ children, className }: { children: ReactNode; className: string }) {
-  return <div className={`rounded-xl border border-slate-200 p-4 shadow-sm ${className}`}>{children}</div>
+  return <div className={`rounded-xl border border-border p-4 shadow-sm ${className}`}>{children}</div>
 }
 
 function FullSection({ section }: { section: OfferSection }) {
@@ -134,33 +134,33 @@ function FullSection({ section }: { section: OfferSection }) {
       return <SpecsGrid items={section.items} cols="grid-cols-2 sm:grid-cols-4" />
     case 'SOURCE':
       return (
-        <SectionCard className="flex flex-col gap-3 bg-slate-50 sm:flex-row sm:items-center sm:justify-between">
+        <SectionCard className="flex flex-col gap-3 bg-surface-muted sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[var(--brand)] shadow-sm">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface text-brand shadow-sm">
               <OfferIcon name={section.icon ?? 'travel_explore'} size={20} />
             </span>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2 text-xs tracking-wider text-slate-400 uppercase">
+              <div className="flex flex-wrap items-center gap-2 text-xs tracking-wider text-ink-muted uppercase">
                 Zweryfikowane źródło zewnętrzne
-                <span className="rounded-md bg-white px-1.5 py-0.5 font-mono text-[11px] normal-case text-[var(--brand)] shadow-sm">
+                <span className="rounded-md bg-surface px-1.5 py-0.5 font-mono text-[11px] normal-case text-brand shadow-sm">
                   {section.engineLabel}
                   {section.scraperId ? ` · ${section.scraperId}` : ''}
                 </span>
               </div>
-              <p className="mt-1 truncate font-mono text-xs text-slate-500">{section.url}</p>
+              <p className="mt-1 truncate font-mono text-xs text-ink-muted">{section.url}</p>
             </div>
           </div>
           <div className="flex shrink-0 gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-ink shadow-sm"
               onClick={() => void navigator.clipboard.writeText(section.url)}
             >
               <OfferIcon name="content_copy" size={14} />
               Kopiuj link
             </button>
             <a
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand)] px-3 py-1.5 text-sm text-white hover:bg-[var(--brand-600)]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm text-white hover:bg-brand-600"
               href={section.url}
               target="_blank"
               rel="noreferrer"
@@ -173,10 +173,10 @@ function FullSection({ section }: { section: OfferSection }) {
       )
     case 'NARRATIVE':
       return (
-        <SectionCard className="space-y-3 bg-white">
+        <SectionCard className="space-y-3 bg-surface">
           <SectionTitle title={section.title} icon={section.icon} />
           {section.paragraphs.map((p, i) => (
-            <p key={i} className="text-sm leading-relaxed whitespace-pre-wrap text-slate-600">
+            <p key={i} className="text-sm leading-relaxed whitespace-pre-wrap text-ink-muted">
               {p}
             </p>
           ))}
@@ -184,7 +184,7 @@ function FullSection({ section }: { section: OfferSection }) {
       )
     case 'PILLS':
       return (
-        <SectionCard className="space-y-3 bg-white">
+        <SectionCard className="space-y-3 bg-surface">
           <SectionTitle title={section.title} icon={section.icon} />
           <PillChips items={section.items} showBadge />
         </SectionCard>
@@ -192,7 +192,7 @@ function FullSection({ section }: { section: OfferSection }) {
     case 'CHECKLIST':
     case 'CARDS':
       return (
-        <SectionCard className="space-y-3 bg-white">
+        <SectionCard className="space-y-3 bg-surface">
           <SectionTitle title={section.title} icon={section.icon} />
           <TitledGrid items={section.items} />
         </SectionCard>
@@ -207,7 +207,7 @@ function PreviewSection({ section }: { section: OfferSection }) {
     case 'SOURCE':
       return (
         <a
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand)] underline"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-brand underline"
           href={section.url}
           target="_blank"
           rel="noreferrer"
@@ -220,7 +220,7 @@ function PreviewSection({ section }: { section: OfferSection }) {
       return (
         <div>
           <SectionTitle title={section.title} icon={section.icon} />
-          <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap text-slate-600">
+          <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap text-ink-muted">
             {previewNarrative(section.paragraphs)}
           </p>
         </div>
@@ -235,8 +235,8 @@ function PreviewSection({ section }: { section: OfferSection }) {
     case 'CHECKLIST':
     case 'CARDS':
       return (
-        <p className="flex items-center gap-1.5 text-sm text-slate-500">
-          {section.icon && <OfferIcon name={section.icon} size={14} className="text-slate-400" />}
+        <p className="flex items-center gap-1.5 text-sm text-ink-muted">
+          {section.icon && <OfferIcon name={section.icon} size={14} className="text-ink-muted" />}
           {section.title} · {section.items.length} pozycji
         </p>
       )

@@ -3,7 +3,7 @@ export function BrandMark({ size = 8 }: { size?: 8 | 12 }) {
   const icon = size === 12 ? 'h-6 w-6' : 'h-5 w-5'
   return (
     <div
-      className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-tr from-[var(--brand-600)] to-blue-500 text-white shadow-sm shadow-blue-500/30`}
+      className={`flex ${box} items-center justify-center rounded-lg bg-gradient-to-tr from-brand-600 to-blue-500 text-white shadow-sm shadow-blue-500/30`}
     >
       <svg className={icon} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path

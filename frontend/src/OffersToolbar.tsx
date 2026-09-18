@@ -29,17 +29,17 @@ export function OffersToolbar({
   onClearFilters: () => void
 }) {
   return (
-    <section className="flex-shrink-0 border-b border-slate-200 bg-white px-5 py-3">
+    <section className="flex-shrink-0 border-b border-border bg-surface px-5 py-3">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl font-bold tracking-tight text-ink">
             {view === 'kanban' ? 'Tablica Ofert' : 'Lista Ofert'}
           </h1>
-          <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-[var(--brand)]">
+          <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-brand dark:border-blue-800 dark:bg-blue-950/50">
             {count}
           </span>
         </div>
-        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5">
+        <div className="inline-flex rounded-lg border border-border bg-surface-muted p-0.5">
           {(
             [
               ['kanban', LayoutGrid, 'Kanban'],
@@ -51,8 +51,8 @@ export function OffersToolbar({
               type="button"
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs ${
                 view === mode
-                  ? 'bg-white font-semibold text-slate-800 shadow-sm'
-                  : 'font-medium text-slate-500 hover:text-slate-800'
+                  ? 'bg-surface font-semibold text-ink shadow-sm'
+                  : 'font-medium text-ink-muted hover:text-ink'
               }`}
               onClick={() => onViewChange(mode)}
             >
@@ -63,12 +63,12 @@ export function OffersToolbar({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs">
         <div className="flex flex-wrap items-center gap-2.5">
-          <label className="flex items-center gap-1.5 font-medium text-slate-500">
+          <label className="flex items-center gap-1.5 font-medium text-ink-muted">
             Źródło:
             <select
-              className="rounded-md border border-slate-300 bg-white py-1 pr-8 pl-2.5 font-medium text-slate-700 focus:ring-1 focus:ring-[var(--brand)] focus:outline-none"
+              className="rounded-md border border-border bg-surface py-1 pr-8 pl-2.5 font-medium text-ink focus:ring-1 focus:ring-brand focus:outline-none"
               value={sourceBot}
               onChange={(e) => onSourceChange(e.target.value as '' | SourceBot)}
             >
@@ -77,27 +77,31 @@ export function OffersToolbar({
               <option value="GROK">Grok</option>
             </select>
           </label>
-          <label className="flex items-center gap-1.5 font-medium text-slate-500">
+          <label className="flex items-center gap-1.5 font-medium text-ink-muted">
             Od:
             <input
               type="date"
-              className="w-36 rounded-md border border-slate-300 bg-white py-1 px-2.5 text-slate-700 focus:ring-1 focus:ring-[var(--brand)] focus:outline-none"
+              className="w-36 rounded-md border border-border bg-surface py-1 px-2.5 text-ink focus:ring-1 focus:ring-brand focus:outline-none"
               value={from}
               onChange={(e) => onFromChange(e.target.value)}
             />
           </label>
-          <label className="flex items-center gap-1.5 font-medium text-slate-500">
+          <label className="flex items-center gap-1.5 font-medium text-ink-muted">
             Do:
             <input
               type="date"
-              className="w-36 rounded-md border border-slate-300 bg-white py-1 px-2.5 text-slate-700 focus:ring-1 focus:ring-[var(--brand)] focus:outline-none"
+              className="w-36 rounded-md border border-border bg-surface py-1 px-2.5 text-ink focus:ring-1 focus:ring-brand focus:outline-none"
               value={to}
               onChange={(e) => onToChange(e.target.value)}
             />
           </label>
         </div>
         {hasFilters && (
-          <button type="button" className="font-medium text-slate-500 hover:text-slate-800" onClick={onClearFilters}>
+          <button
+            type="button"
+            className="font-medium text-ink-muted hover:text-ink"
+            onClick={onClearFilters}
+          >
             Wyczyść filtry
           </button>
         )}
