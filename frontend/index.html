@@ -9,15 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script>
       (function () {
+        var pref = 'system'
         try {
-          var pref = localStorage.getItem('joblin-theme')
-          if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'system'
-          var dark =
-            pref === 'dark' ||
-            (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-          document.documentElement.classList.toggle('dark', dark)
-          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+          var stored = localStorage.getItem('joblin-theme')
+          if (stored === 'light' || stored === 'dark' || stored === 'system') pref = stored
         } catch (_) {}
+        var dark =
+          pref === 'dark' ||
+          (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.classList.toggle('dark', dark)
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
       })()
     </script>
   </head>
