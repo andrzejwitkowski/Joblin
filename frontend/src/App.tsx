@@ -90,7 +90,7 @@ export default function App() {
   }
 
   if (me === undefined) {
-    return <div className="grid min-h-full place-items-center text-slate-500">Ładowanie…</div>
+    return <div className="grid min-h-full place-items-center text-ink-muted">Ładowanie…</div>
   }
   if (me === null) return <LoginScreen />
 

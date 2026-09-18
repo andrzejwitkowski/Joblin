@@ -22,7 +22,7 @@ export function OfferList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-4">
-      <div className="flex flex-wrap items-center gap-4 border-b border-slate-200 px-1 pt-1 sm:gap-6">
+      <div className="flex flex-wrap items-center gap-4 border-b border-border px-1 pt-1 sm:gap-6">
         <TabButton active={tab === 'all'} count={offers.length} onClick={() => setTab('all')}>
           Wszystkie
         </TabButton>
@@ -39,10 +39,10 @@ export function OfferList({
         ))}
       </div>
 
-      <div className="mt-3 min-h-0 flex-1 overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="mt-3 min-h-0 flex-1 overflow-auto rounded-xl border border-border bg-surface shadow-sm">
         <table className="w-full border-collapse text-left text-xs">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/80 text-[10px] font-semibold tracking-wide text-slate-500 uppercase">
+            <tr className="border-b border-border bg-surface-muted/80 text-[10px] font-semibold tracking-wide text-ink-muted uppercase">
               <th className="min-w-[280px] px-4 py-3">Rola i Firma</th>
               <th className="min-w-[160px] px-4 py-3">Status</th>
               <th className="min-w-[140px] px-4 py-3">Wynagrodzenie</th>
@@ -51,13 +51,13 @@ export function OfferList({
               <th className="min-w-[90px] px-4 py-3 text-right">Akcje</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {rows.map((offer) => (
               <OfferRow key={offer.id} offer={offer} onSelect={onSelect} onStatusChange={onStatusChange} />
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-slate-400">
+                <td colSpan={6} className="px-4 py-10 text-center text-ink-muted">
                   Brak ofert dla wybranych filtrów
                 </td>
               </tr>
@@ -83,56 +83,57 @@ function OfferRow({
   return (
     <tr
       style={terminal ? { opacity } : undefined}
-      className={`hover:bg-slate-50 ${terminal ? 'bg-slate-50/50' : ''}`}
+      className={`hover:bg-surface-muted ${terminal ? 'bg-surface-muted/50' : ''}`}
     >
       <td className="px-4 py-3.5">
         <div className="flex items-start gap-2.5">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xs font-bold text-blue-700">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-xs font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
             {(offer.company.trim()[0] ?? '?').toUpperCase()}
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                className={`leading-tight font-bold hover:text-[var(--brand)] ${
-                  terminal ? 'text-slate-600 line-through' : 'text-slate-900'
+                className={`leading-tight font-bold hover:text-brand ${
+                  terminal ? 'text-ink-muted line-through' : 'text-ink'
                 }`}
                 onClick={() => onSelect(offer)}
               >
                 {offer.title}
               </button>
-              <span className="text-slate-400" title={offer.sourceBot}>
+              <span className="text-ink-muted" title={offer.sourceBot}>
                 <SourceBotIcon bot={offer.sourceBot} size={14} />
               </span>
             </div>
-            <p className={`mt-0.5 text-[11px] ${terminal ? 'text-slate-400' : 'text-slate-500'}`}>{offer.company}</p>
+            <p className="mt-0.5 text-[11px] text-ink-muted">{offer.company}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-3.5">
         <StatusSelect offer={offer} onStatusChange={onStatusChange} />
       </td>
-      <td className={`px-4 py-3.5 font-bold ${terminal ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+      <td className={`px-4 py-3.5 font-bold ${terminal ? 'text-ink-muted line-through' : 'text-ink'}`}>
         {offer.salary ?? '—'}
       </td>
       <td className="px-4 py-3.5">
         <div className={`flex flex-wrap gap-1 ${terminal ? 'opacity-70' : ''}`}>
-          {offer.tags.length === 0 && <span className="text-slate-400">—</span>}
+          {offer.tags.length === 0 && <span className="text-ink-muted">—</span>}
           {offer.tags.slice(0, 5).map((t) => (
-            <span key={t} className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700">
+            <span
+              key={t}
+              className="rounded border border-border bg-surface-muted px-2 py-0.5 text-[11px] text-ink"
+            >
               {t}
             </span>
           ))}
         </div>
       </td>
-      <td className={`px-4 py-3.5 text-[11px] ${terminal ? 'text-slate-400' : 'text-slate-500'}`}>
-        {relativeTime(offer.foundAt)}
-      </td>
+      <td className="px-4 py-3.5 text-[11px] text-ink-muted">{relativeTime(offer.foundAt)}</td>
       <td className="px-4 py-3.5 text-right">
         {terminal ? (
           <button
             type="button"
-            className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-500 hover:text-slate-800"
+            className="rounded border border-border bg-surface px-2.5 py-1 text-xs text-ink-muted hover:text-ink"
             onClick={() => onStatusChange('NEW', offer.id)}
           >
             Przywróć
@@ -140,7 +141,7 @@ function OfferRow({
         ) : (
           <button
             type="button"
-            className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 hover:text-blue-600"
+            className="rounded border border-border bg-surface px-2.5 py-1 text-xs text-ink hover:text-brand"
             onClick={() => onSelect(offer)}
           >
             Szczegóły
@@ -169,8 +170,8 @@ function TabButton({
       type="button"
       className={`flex items-center gap-1.5 border-b-2 pb-2.5 text-xs ${
         active
-          ? 'border-[var(--brand)] font-bold text-[var(--brand)]'
-          : 'border-transparent font-semibold text-slate-500 hover:text-slate-800'
+          ? 'border-brand font-bold text-brand'
+          : 'border-transparent font-semibold text-ink-muted hover:text-ink'
       }`}
       onClick={onClick}
     >
@@ -178,7 +179,9 @@ function TabButton({
       <span>{children}</span>
       <span
         className={`rounded-full px-1.5 text-[10px] ${
-          active ? 'bg-blue-100 text-[var(--brand)]' : 'bg-slate-200/70 text-slate-600'
+          active
+            ? 'bg-blue-100 text-brand dark:bg-blue-950/50'
+            : 'bg-surface-muted text-ink-muted'
         }`}
       >
         {count}

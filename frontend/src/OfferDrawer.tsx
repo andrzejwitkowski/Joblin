@@ -38,29 +38,29 @@ export function OfferDrawer({
       }}
     >
       <aside
-        className="h-full w-full max-w-md overflow-y-auto border-l border-slate-200 bg-white p-5 shadow-xl"
+        className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-surface p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          className="mb-4 text-sm text-slate-500 hover:text-slate-800"
+          className="mb-4 text-sm text-ink-muted hover:text-ink"
           onClick={onClose}
           autoFocus
         >
           Zamknij
         </button>
-        <h2 id={titleId} className="text-2xl font-semibold text-slate-900">
+        <h2 id={titleId} className="text-2xl font-semibold text-ink">
           {offer.title}
         </h2>
-        <p className="mt-1 text-slate-500">{offer.company}</p>
+        <p className="mt-1 text-ink-muted">{offer.company}</p>
         {(offer.salary || offer.location) && (
-          <p className="mt-3 text-sm font-semibold text-slate-800">
+          <p className="mt-3 text-sm font-semibold text-ink">
             {[offer.salary, offer.location].filter(Boolean).join(' · ')}
           </p>
         )}
         <div className="mt-3 flex flex-wrap gap-3">
           <a
-            className="inline-block text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
+            className="inline-block text-sm font-medium text-brand underline hover:text-brand-600"
             href={offer.sourceUrl}
             target="_blank"
             rel="noreferrer"
@@ -69,14 +69,14 @@ export function OfferDrawer({
           </a>
           <button
             type="button"
-            className="text-sm font-medium text-[var(--brand)] underline hover:text-[var(--brand-600)]"
+            className="text-sm font-medium text-brand underline hover:text-brand-600"
             onClick={onOpenFull}
           >
             Pełny widok
           </button>
         </div>
         <OfferSectionsPreview offer={offer} />
-        <dl className="mt-6 space-y-1 text-xs text-slate-500">
+        <dl className="mt-6 space-y-1 text-xs text-ink-muted">
           <div>Status oferty: {STATUS_META[offer.status].label}</div>
           <div>Źródło: {offer.sourceBot}</div>
           <div>Znaleziono: {new Date(offer.foundAt).toLocaleString('pl-PL')}</div>

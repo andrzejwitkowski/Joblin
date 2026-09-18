@@ -17,8 +17,8 @@ function MetaItem({
   emphasize?: boolean
 }) {
   return (
-    <span className={`inline-flex items-center gap-1 ${emphasize ? 'text-slate-800' : ''}`}>
-      <OfferIcon name={icon} size={15} className={emphasize ? 'text-amber-600' : 'text-slate-400'} />
+    <span className={`inline-flex items-center gap-1 ${emphasize ? 'text-ink' : ''}`}>
+      <OfferIcon name={icon} size={15} className={emphasize ? 'text-amber-600' : 'text-ink-muted'} />
       {children}
     </span>
   )
@@ -35,42 +35,42 @@ export function OfferDetail({
 }) {
   return (
     <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-6 pb-10">
-      <nav className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+      <nav className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[var(--brand)] hover:underline"
+          className="inline-flex items-center gap-1 text-brand hover:underline"
           onClick={onBack}
         >
           <ArrowLeft size={16} aria-hidden />
           Tablica ofert
         </button>
-        <span aria-hidden className="text-slate-300">
+        <span aria-hidden className="text-border">
           /
         </span>
-        <span className="truncate font-medium text-slate-900">{offer.title}</span>
+        <span className="truncate font-medium text-ink">{offer.title}</span>
       </nav>
 
-      <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)] md:p-6">
+      <header className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow-card)] md:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-3">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-amber-600">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-amber-600">
                 <OfferIcon name="corporate_fare" size={22} />
               </span>
-              <span className="text-base font-semibold tracking-tight text-slate-900">{offer.company}</span>
+              <span className="text-base font-semibold tracking-tight text-ink">{offer.company}</span>
               {offer.employmentLabel && (
                 <>
-                  <span className="text-slate-300" aria-hidden>
+                  <span className="text-border" aria-hidden>
                     |
                   </span>
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                  <span className="rounded-md bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-ink-muted">
                     {offer.employmentLabel}
                   </span>
                 </>
               )}
             </div>
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">{offer.title}</h2>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-slate-500">
+            <h2 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">{offer.title}</h2>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-ink-muted">
               {offer.salary && (
                 <MetaItem icon="monetization_on" emphasize>
                   <span className="font-semibold">{offer.salary}</span>
@@ -84,12 +84,12 @@ export function OfferDetail({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <label className="flex items-center gap-2 rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm">
               <span className="sr-only">Status</span>
               <StatusSelect offer={offer} onStatusChange={(status) => onStatusChange(status)} />
             </label>
             <a
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--brand-600)]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
               href={offer.sourceUrl}
               target="_blank"
               rel="noreferrer"
@@ -103,33 +103,33 @@ export function OfferDetail({
 
       <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
         <OfferSectionsView offer={offer} className="lg:col-span-8" />
-        <aside className="rounded-xl border border-slate-200 bg-white p-5 shadow-[var(--shadow-card)] lg:col-span-4">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">Metadane i źródło</h3>
+        <aside className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow-card)] lg:col-span-4">
+          <h3 className="mb-3 text-sm font-semibold text-ink">Metadane i źródło</h3>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-slate-500">Status</dt>
-              <dd className="font-medium text-slate-800">{STATUS_META[offer.status].label}</dd>
+              <dt className="text-ink-muted">Status</dt>
+              <dd className="font-medium text-ink">{STATUS_META[offer.status].label}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-slate-500">Bot</dt>
-              <dd className="inline-flex items-center gap-1.5 font-mono text-xs text-slate-800">
+              <dt className="text-ink-muted">Bot</dt>
+              <dd className="inline-flex items-center gap-1.5 font-mono text-xs text-ink">
                 <SourceBotIcon bot={offer.sourceBot} size={14} />
                 {offer.sourceBot}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-slate-500">Aktualizacja</dt>
-              <dd className="font-mono text-xs text-slate-700">
+              <dt className="text-ink-muted">Aktualizacja</dt>
+              <dd className="font-mono text-xs text-ink">
                 {new Date(offer.updatedAt).toLocaleString('pl-PL')}
               </dd>
             </div>
           </dl>
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <span className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="mt-4 rounded-xl border border-border bg-surface-muted p-3">
+            <span className="block text-[10px] font-semibold tracking-wider text-ink-muted uppercase">
               Kanoniczny URL
             </span>
             <a
-              className="mt-1 block break-all font-mono text-xs text-[var(--brand)] underline"
+              className="mt-1 block break-all font-mono text-xs text-brand underline"
               href={offer.sourceUrl}
               target="_blank"
               rel="noreferrer"
