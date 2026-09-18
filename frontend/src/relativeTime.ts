@@ -1,4 +1,5 @@
 import i18n from './i18n'
+import { formatDate } from './i18n/format'
 
 export function relativeTime(iso: string, now = Date.now()): string {
   const then = new Date(iso).getTime()
@@ -16,16 +17,13 @@ export function relativeTime(iso: string, now = Date.now()): string {
   const dayDiff = Math.round((startToday.getTime() - startThen.getTime()) / 86_400_000)
   if (dayDiff === 1) return i18n.t('time.yesterday')
   if (dayDiff < 7) return i18n.t('time.daysAgo', { count: dayDiff })
-  return new Date(iso).toLocaleDateString(i18n.language)
+  return formatDate(iso)
 }
 
 // ponytail: tiny self-check; upgrade to a real test if this grows.
 if (import.meta.env.DEV) {
   const t0 = Date.parse('2024-10-15T12:00:00Z')
-  const prev = i18n.language
-  void i18n.changeLanguage('en').then(() => {
-    console.assert(relativeTime('2024-10-15T11:46:00Z', t0) === '14 min ago')
-    console.assert(relativeTime('2024-10-14T12:00:00Z', t0) === 'Yesterday')
-    void i18n.changeLanguage(prev)
-  })
+  console.assert(i18n.t('time.minAgo', { lng: 'en', count: 14 }) === '14 min ago')
+  console.assert(i18n.t('time.yesterday', { lng: 'en' }) === 'Yesterday')
+  console.assert(relativeTime('2024-10-15T11:59:30Z', t0) === i18n.t('time.justNow'))
 }

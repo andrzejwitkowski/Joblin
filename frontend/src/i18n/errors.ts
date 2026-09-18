@@ -10,9 +10,9 @@ const API_ERROR_KEYS: Record<string, string> = {
   'Failed to update status': 'errors.updateStatus',
 }
 
+/** Map a stable English API/app error message to the active locale. */
 export function translateApiError(raw: unknown): string {
   const message = raw instanceof Error ? raw.message : typeof raw === 'string' ? raw : ''
-  if (!message) return i18n.t('errors.generic')
-  const key = API_ERROR_KEYS[message]
-  return key ? i18n.t(key) : i18n.t('errors.generic')
+  const key = message ? API_ERROR_KEYS[message] : undefined
+  return i18n.t(key ?? 'errors.generic')
 }

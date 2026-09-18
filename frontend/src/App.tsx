@@ -31,6 +31,8 @@ export default function App() {
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
   const filtered = visibleOffers(offers, now).filter((o) => matchesSearch(o, search))
+  const bootErrorText = bootError ? translateApiError(bootError) : null
+  const statusErrorText = statusError ? translateApiError(statusError) : null
 
   useEffect(() => {
     const nextEnds = offers
@@ -57,7 +59,7 @@ export default function App() {
             setOwnerUserId((list.find((u) => u.role === 'USER') ?? list[0] ?? user).id)
           } catch (err) {
             console.error(err)
-            if (!cancelled) setBootError(translateApiError('Failed to load users'))
+            if (!cancelled) setBootError('Failed to load users')
             setOwnerUserId(user.id)
           }
         } else {
@@ -88,7 +90,7 @@ export default function App() {
       .then(syncOffer)
       .catch((err: unknown) => {
         console.error(err)
-        setStatusError(translateApiError(err instanceof Error ? err : 'Failed to update status'))
+        setStatusError(err instanceof Error ? err.message : 'Failed to update status')
       })
   }
 
@@ -107,7 +109,7 @@ export default function App() {
         search={search}
         onSearchChange={setSearch}
       >
-        {statusError && <p className="px-5 pt-2 text-sm text-red-700">{statusError}</p>}
+        {statusErrorText && <p className="px-5 pt-2 text-sm text-red-700">{statusErrorText}</p>}
         <OfferDetail
           offer={selection.offer}
           onBack={() => setSelection(null)}
@@ -126,8 +128,8 @@ export default function App() {
       search={search}
       onSearchChange={setSearch}
     >
-      {bootError && <p className="px-5 pt-2 text-sm text-red-700">{bootError}</p>}
-      {statusError && <p className="px-5 pt-2 text-sm text-red-700">{statusError}</p>}
+      {bootErrorText && <p className="px-5 pt-2 text-sm text-red-700">{bootErrorText}</p>}
+      {statusErrorText && <p className="px-5 pt-2 text-sm text-red-700">{statusErrorText}</p>}
 
       <OffersToolbar
         view={view}

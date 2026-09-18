@@ -9,6 +9,14 @@ import pl from './locales/pl.json'
 export type { AppLocale } from './locale'
 export { LOCALE_STORAGE_KEY, normalizeLocale, SUPPORTED_LOCALES, isAppLocale } from './locale'
 
+function syncDocumentLang(lng: string) {
+  const locale = normalizeLocale(lng)
+  document.documentElement.lang = locale
+  document.title = i18n.t('app.documentTitle', { lng: locale })
+}
+
+i18n.on('languageChanged', syncDocumentLang)
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -30,19 +38,10 @@ void i18n
       convertDetectedLanguage: (lng) => normalizeLocale(lng),
     },
   })
+  .then(() => syncDocumentLang(i18n.language))
 
-function syncDocumentLang(lng: string) {
-  const locale = normalizeLocale(lng)
-  document.documentElement.lang = locale
-  document.title = i18n.t('app.documentTitle', { lng: locale })
-}
-
-i18n.on('languageChanged', syncDocumentLang)
-if (i18n.isInitialized) syncDocumentLang(i18n.language)
-else void i18n.on('initialized', () => syncDocumentLang(i18n.language))
-
-export async function setAppLocale(locale: AppLocale) {
-  await i18n.changeLanguage(locale)
+export function setAppLocale(locale: AppLocale) {
+  return i18n.changeLanguage(locale)
 }
 
 export default i18n

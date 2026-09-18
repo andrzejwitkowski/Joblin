@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { JobOffer } from './api'
+import { formatDateTime } from './i18n/format'
 import { statusLabel } from './offerStatus'
 import { OfferSectionsPreview } from './offerSections'
 
@@ -13,11 +14,10 @@ export function OfferDrawer({
   onClose: () => void
   onOpenFull: () => void
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
   const previouslyFocused = useRef<HTMLElement | null>(null)
-  const when = (iso: string) => new Date(iso).toLocaleString(i18n.language)
 
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement | null
@@ -82,8 +82,8 @@ export function OfferDrawer({
         <dl className="mt-6 space-y-1 text-xs text-ink-muted">
           <div>{t('drawer.offerStatus', { status: statusLabel(offer.status, t) })}</div>
           <div>{t('drawer.source', { bot: offer.sourceBot })}</div>
-          <div>{t('drawer.foundAt', { when: when(offer.foundAt) })}</div>
-          <div>{t('drawer.updatedAt', { when: when(offer.updatedAt) })}</div>
+          <div>{t('drawer.foundAt', { when: formatDateTime(offer.foundAt) })}</div>
+          <div>{t('drawer.updatedAt', { when: formatDateTime(offer.updatedAt) })}</div>
         </dl>
       </aside>
     </dialog>

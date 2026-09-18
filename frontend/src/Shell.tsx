@@ -3,7 +3,7 @@ import { Languages, LogOut, Moon, Search, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { logout, type Me, type UserSummary } from './api'
 import { BrandMark } from './BrandMark'
-import { normalizeLocale, setAppLocale, SUPPORTED_LOCALES, type AppLocale } from './i18n'
+import { normalizeLocale, setAppLocale, SUPPORTED_LOCALES } from './i18n'
 import { useTheme } from './theme'
 
 export function Shell({
@@ -45,7 +45,7 @@ export function Shell({
 
   function cycleLocale() {
     const i = SUPPORTED_LOCALES.indexOf(locale)
-    const next = SUPPORTED_LOCALES[(i + 1) % SUPPORTED_LOCALES.length] as AppLocale
+    const next = SUPPORTED_LOCALES[(i + 1) % SUPPORTED_LOCALES.length]!
     void setAppLocale(next)
   }
 

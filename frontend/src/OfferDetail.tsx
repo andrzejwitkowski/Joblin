@@ -2,6 +2,7 @@ import { ArrowLeft, ExternalLink } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { JobOffer, OfferStatus } from './api'
+import { formatDateTime } from './i18n/format'
 import { OfferIcon } from './offerIcons'
 import { statusLabel } from './offerStatus'
 import { OfferSectionsView } from './offerSections'
@@ -34,8 +35,7 @@ export function OfferDetail({
   onBack: () => void
   onStatusChange: (status: OfferStatus) => void
 }) {
-  const { t, i18n } = useTranslation()
-  const when = (iso: string) => new Date(iso).toLocaleString(i18n.language)
+  const { t } = useTranslation()
   return (
     <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-6 pb-10">
       <nav className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
@@ -81,7 +81,7 @@ export function OfferDetail({
               )}
               {offer.location && <MetaItem icon="location_on">{offer.location}</MetaItem>}
               {offer.workMode && <MetaItem icon="laptop_mac">{offer.workMode}</MetaItem>}
-              <MetaItem icon="schedule">{t('detail.foundAt', { when: when(offer.foundAt) })}</MetaItem>
+              <MetaItem icon="schedule">{t('detail.foundAt', { when: formatDateTime(offer.foundAt) })}</MetaItem>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -120,7 +120,7 @@ export function OfferDetail({
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-ink-muted">{t('detail.updated')}</dt>
-              <dd className="font-mono text-xs text-ink">{when(offer.updatedAt)}</dd>
+              <dd className="font-mono text-xs text-ink">{formatDateTime(offer.updatedAt)}</dd>
             </div>
           </dl>
           <div className="mt-4 rounded-xl border border-border bg-surface-muted p-3">
