@@ -1,4 +1,5 @@
 import { LayoutGrid, List } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { SourceBot } from './api'
 
 export type ViewMode = 'kanban' | 'list'
@@ -28,12 +29,13 @@ export function OffersToolbar({
   onToChange: (v: string) => void
   onClearFilters: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <section className="flex-shrink-0 border-b border-border bg-surface px-5 py-3">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold tracking-tight text-ink">
-            {view === 'kanban' ? 'Tablica Ofert' : 'Lista Ofert'}
+            {view === 'kanban' ? t('toolbar.boardTitle') : t('toolbar.listTitle')}
           </h1>
           <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-brand dark:border-blue-800 dark:bg-blue-950/50">
             {count}
@@ -42,10 +44,10 @@ export function OffersToolbar({
         <div className="inline-flex rounded-lg border border-border bg-surface-muted p-0.5">
           {(
             [
-              ['kanban', LayoutGrid, 'Kanban'],
-              ['list', List, 'Lista'],
+              ['kanban', LayoutGrid, 'toolbar.kanban'],
+              ['list', List, 'toolbar.list'],
             ] as const
-          ).map(([mode, Icon, label]) => (
+          ).map(([mode, Icon, labelKey]) => (
             <button
               key={mode}
               type="button"
@@ -57,7 +59,7 @@ export function OffersToolbar({
               onClick={() => onViewChange(mode)}
             >
               <Icon className="h-3.5 w-3.5" aria-hidden />
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
@@ -66,19 +68,19 @@ export function OffersToolbar({
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs">
         <div className="flex flex-wrap items-center gap-2.5">
           <label className="flex items-center gap-1.5 font-medium text-ink-muted">
-            Źródło:
+            {t('toolbar.source')}
             <select
               className="rounded-md border border-border bg-surface py-1 pr-8 pl-2.5 font-medium text-ink focus:ring-1 focus:ring-brand focus:outline-none"
               value={sourceBot}
               onChange={(e) => onSourceChange(e.target.value as '' | SourceBot)}
             >
-              <option value="">Wszystkie</option>
+              <option value="">{t('toolbar.allSources')}</option>
               <option value="HERMES">Hermes</option>
               <option value="GROK">Grok</option>
             </select>
           </label>
           <label className="flex items-center gap-1.5 font-medium text-ink-muted">
-            Od:
+            {t('toolbar.from')}
             <input
               type="date"
               className="w-36 rounded-md border border-border bg-surface py-1 px-2.5 text-ink focus:ring-1 focus:ring-brand focus:outline-none"
@@ -87,7 +89,7 @@ export function OffersToolbar({
             />
           </label>
           <label className="flex items-center gap-1.5 font-medium text-ink-muted">
-            Do:
+            {t('toolbar.to')}
             <input
               type="date"
               className="w-36 rounded-md border border-border bg-surface py-1 px-2.5 text-ink focus:ring-1 focus:ring-brand focus:outline-none"
@@ -102,7 +104,7 @@ export function OffersToolbar({
             className="font-medium text-ink-muted hover:text-ink"
             onClick={onClearFilters}
           >
-            Wyczyść filtry
+            {t('common.clearFilters')}
           </button>
         )}
       </div>

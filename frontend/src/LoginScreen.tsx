@@ -1,6 +1,8 @@
 import { BrandMark } from './BrandMark'
+import { useTranslation } from 'react-i18next'
 
 export function LoginScreen() {
+  const { t } = useTranslation()
   return (
     <div className="grid min-h-full place-items-center bg-paper px-6">
       <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-[var(--shadow-card)]">
@@ -11,13 +13,13 @@ export function LoginScreen() {
             Recruit OS
           </div>
         </div>
-        <h1 className="mb-2 text-center text-lg font-semibold text-ink">Zaloguj się</h1>
-        <p className="mb-6 text-center text-sm text-ink-muted">Google login. Tylko konta z whitelisty.</p>
+        <h1 className="mb-2 text-center text-lg font-semibold text-ink">{t('login.title')}</h1>
+        <p className="mb-6 text-center text-sm text-ink-muted">{t('login.subtitle')}</p>
         <a
           href="/oauth2/authorization/google"
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-600"
         >
-          Kontynuuj z Google
+          {t('login.continueGoogle')}
         </a>
       </div>
     </div>

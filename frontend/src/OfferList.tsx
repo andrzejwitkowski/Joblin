@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { JobOffer, OfferStatus } from './api'
-import { countByStatus, fadeOpacity, isTerminal, OFFER_STATUSES, STATUS_META } from './offerStatus'
+import { countByStatus, fadeOpacity, isTerminal, OFFER_STATUSES, STATUS_META, statusLabel } from './offerStatus'
 import { relativeTime } from './relativeTime'
 import { SourceBotIcon } from './SourceBotIcon'
 import { StatusSelect } from './StatusSelect'
@@ -16,6 +17,7 @@ export function OfferList({
   onSelect: (offer: JobOffer) => void
   onStatusChange: (status: OfferStatus, offerId: string) => void
 }) {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('all')
   const counts = countByStatus(offers)
   const rows = tab === 'all' ? offers : offers.filter((o) => o.status === tab)
@@ -24,7 +26,7 @@ export function OfferList({
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 pb-4">
       <div className="flex flex-wrap items-center gap-4 border-b border-border px-1 pt-1 sm:gap-6">
         <TabButton active={tab === 'all'} count={offers.length} onClick={() => setTab('all')}>
-          Wszystkie
+          {t('common.all')}
         </TabButton>
         {OFFER_STATUSES.map((status) => (
           <TabButton
@@ -34,7 +36,7 @@ export function OfferList({
             dot={STATUS_META[status].dot}
             onClick={() => setTab(status)}
           >
-            {STATUS_META[status].label}
+            {statusLabel(status, t)}
           </TabButton>
         ))}
       </div>
@@ -43,12 +45,12 @@ export function OfferList({
         <table className="w-full border-collapse text-left text-xs">
           <thead>
             <tr className="border-b border-border bg-surface-muted/80 text-[10px] font-semibold tracking-wide text-ink-muted uppercase">
-              <th className="min-w-[280px] px-4 py-3">Rola i Firma</th>
-              <th className="min-w-[160px] px-4 py-3">Status</th>
-              <th className="min-w-[140px] px-4 py-3">Wynagrodzenie</th>
-              <th className="min-w-[180px] px-4 py-3">Technologie</th>
-              <th className="min-w-[100px] px-4 py-3">Aktywność</th>
-              <th className="min-w-[90px] px-4 py-3 text-right">Akcje</th>
+              <th className="min-w-[280px] px-4 py-3">{t('list.colRoleCompany')}</th>
+              <th className="min-w-[160px] px-4 py-3">{t('list.colStatus')}</th>
+              <th className="min-w-[140px] px-4 py-3">{t('list.colSalary')}</th>
+              <th className="min-w-[180px] px-4 py-3">{t('list.colTech')}</th>
+              <th className="min-w-[100px] px-4 py-3">{t('list.colActivity')}</th>
+              <th className="min-w-[90px] px-4 py-3 text-right">{t('list.colActions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -58,7 +60,7 @@ export function OfferList({
             {rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-10 text-center text-ink-muted">
-                  Brak ofert dla wybranych filtrów
+                  {t('list.empty')}
                 </td>
               </tr>
             )}
@@ -78,6 +80,7 @@ function OfferRow({
   onSelect: (offer: JobOffer) => void
   onStatusChange: (status: OfferStatus, offerId: string) => void
 }) {
+  const { t } = useTranslation()
   const terminal = isTerminal(offer.status)
   const opacity = terminal ? fadeOpacity(offer.fadeStartedAt) : 1
   return (
@@ -118,12 +121,12 @@ function OfferRow({
       <td className="px-4 py-3.5">
         <div className={`flex flex-wrap gap-1 ${terminal ? 'opacity-70' : ''}`}>
           {offer.tags.length === 0 && <span className="text-ink-muted">—</span>}
-          {offer.tags.slice(0, 5).map((t) => (
+          {offer.tags.slice(0, 5).map((tag) => (
             <span
-              key={t}
+              key={tag}
               className="rounded border border-border bg-surface-muted px-2 py-0.5 text-[11px] text-ink"
             >
-              {t}
+              {tag}
             </span>
           ))}
         </div>
@@ -136,7 +139,7 @@ function OfferRow({
             className="rounded border border-border bg-surface px-2.5 py-1 text-xs text-ink-muted hover:text-ink"
             onClick={() => onStatusChange('NEW', offer.id)}
           >
-            Przywróć
+            {t('common.restore')}
           </button>
         ) : (
           <button
@@ -144,7 +147,7 @@ function OfferRow({
             className="rounded border border-border bg-surface px-2.5 py-1 text-xs text-ink hover:text-brand"
             onClick={() => onSelect(offer)}
           >
-            Szczegóły
+            {t('common.details')}
           </button>
         )}
       </td>

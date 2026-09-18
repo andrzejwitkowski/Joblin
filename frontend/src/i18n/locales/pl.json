@@ -1,0 +1,102 @@
+{
+  "common": {
+    "loading": "Ładowanie…",
+    "close": "Zamknij",
+    "restore": "Przywróć",
+    "details": "Szczegóły",
+    "status": "Status",
+    "all": "Wszystkie",
+    "clearFilters": "Wyczyść filtry"
+  },
+  "shell": {
+    "candidate": "Kandydat:",
+    "selectCandidate": "Wybierz kandydata",
+    "searchPlaceholder": "Szukaj ofert, firm, technologii...",
+    "searchAria": "Szukaj ofert",
+    "logout": "Wyloguj się",
+    "language": "Język: {{code}}"
+  },
+  "theme": {
+    "label": "Motyw: {{name}}",
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy"
+  },
+  "login": {
+    "title": "Zaloguj się",
+    "subtitle": "Google login. Tylko konta z whitelisty.",
+    "continueGoogle": "Kontynuuj z Google"
+  },
+  "toolbar": {
+    "boardTitle": "Tablica Ofert",
+    "listTitle": "Lista Ofert",
+    "kanban": "Kanban",
+    "list": "Lista",
+    "source": "Źródło:",
+    "allSources": "Wszystkie",
+    "from": "Od:",
+    "to": "Do:"
+  },
+  "board": {
+    "status": "Status:"
+  },
+  "list": {
+    "colRoleCompany": "Rola i Firma",
+    "colStatus": "Status",
+    "colSalary": "Wynagrodzenie",
+    "colTech": "Technologie",
+    "colActivity": "Aktywność",
+    "colActions": "Akcje",
+    "empty": "Brak ofert dla wybranych filtrów"
+  },
+  "detail": {
+    "back": "Tablica ofert",
+    "foundAt": "Znaleziono {{when}}",
+    "apply": "Aplikuj / otwórz źródło",
+    "metadata": "Metadane i źródło",
+    "bot": "Bot",
+    "updated": "Aktualizacja",
+    "canonicalUrl": "Kanoniczny URL"
+  },
+  "drawer": {
+    "openSource": "Otwórz źródło",
+    "fullView": "Pełny widok",
+    "offerStatus": "Status oferty: {{status}}",
+    "source": "Źródło: {{bot}}",
+    "foundAt": "Znaleziono: {{when}}",
+    "updatedAt": "Aktualizacja: {{when}}"
+  },
+  "sections": {
+    "verifiedSource": "Zweryfikowane źródło zewnętrzne",
+    "copyLink": "Kopiuj link",
+    "openPage": "Otwórz stronę",
+    "itemsCount": "{{title}} · {{count}} pozycji"
+  },
+  "status": {
+    "NEW": "Nowe",
+    "INTERESTED": "Zainteresowany",
+    "APPLIED": "Aplikowane",
+    "NOT_FOR_ME": "Odrzucone",
+    "CLOSED": "Nie wyszło"
+  },
+  "time": {
+    "justNow": "przed chwilą",
+    "minAgo": "{{count}} min temu",
+    "hourAgo": "{{count}} godz. temu",
+    "yesterday": "Wczoraj",
+    "daysAgo": "{{count}} dni temu"
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak",
+    "notFound": "Nie znaleziono",
+    "forbidden": "Brak dostępu",
+    "unauthorized": "Brak autoryzacji",
+    "invalidRequest": "Nieprawidłowe żądanie",
+    "invalidRequestBody": "Nieprawidłowa treść żądania",
+    "loadUsers": "Nie udało się wczytać użytkowników",
+    "updateStatus": "Nie udało się zaktualizować statusu"
+  },
+  "app": {
+    "documentTitle": "Joblin — Tablica Ofert"
+  }
+}

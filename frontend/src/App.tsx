@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getMe, getUsers, type JobOffer, type Me, type OfferStatus, type SourceBot, type UserSummary } from './api'
 import { Board } from './Board'
+import { translateApiError } from './i18n/errors'
 import { LoginScreen } from './LoginScreen'
 import { OfferDetail } from './OfferDetail'
 import { OfferDrawer } from './OfferDrawer'
@@ -13,6 +15,7 @@ import { useOffers } from './useOffers'
 type Selection = { offer: JobOffer; mode: 'drawer' | 'detail' }
 
 export default function App() {
+  const { t } = useTranslation()
   const [me, setMe] = useState<Me | null | undefined>(undefined)
   const [users, setUsers] = useState<UserSummary[]>([])
   const [ownerUserId, setOwnerUserId] = useState('')
@@ -28,12 +31,14 @@ export default function App() {
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
   const filtered = visibleOffers(offers, now).filter((o) => matchesSearch(o, search))
+  const bootErrorText = bootError ? translateApiError(bootError) : null
+  const statusErrorText = statusError ? translateApiError(statusError) : null
 
   useEffect(() => {
     const nextEnds = offers
       .filter((o) => !o.isDeleted && isTerminal(o.status) && o.fadeStartedAt)
       .map((o) => new Date(o.fadeStartedAt!).getTime() + FADE_MS)
-      .filter((t) => t > Date.now())
+      .filter((end) => end > Date.now())
     if (nextEnds.length === 0) return
     const id = window.setTimeout(() => setNow(Date.now()), Math.min(...nextEnds) - Date.now())
     return () => window.clearTimeout(id)
@@ -90,7 +95,7 @@ export default function App() {
   }
 
   if (me === undefined) {
-    return <div className="grid min-h-full place-items-center text-ink-muted">Ładowanie…</div>
+    return <div className="grid min-h-full place-items-center text-ink-muted">{t('common.loading')}</div>
   }
   if (me === null) return <LoginScreen />
 
@@ -104,7 +109,7 @@ export default function App() {
         search={search}
         onSearchChange={setSearch}
       >
-        {statusError && <p className="px-5 pt-2 text-sm text-red-700">{statusError}</p>}
+        {statusErrorText && <p className="px-5 pt-2 text-sm text-red-700">{statusErrorText}</p>}
         <OfferDetail
           offer={selection.offer}
           onBack={() => setSelection(null)}
@@ -123,8 +128,8 @@ export default function App() {
       search={search}
       onSearchChange={setSearch}
     >
-      {bootError && <p className="px-5 pt-2 text-sm text-red-700">{bootError}</p>}
-      {statusError && <p className="px-5 pt-2 text-sm text-red-700">{statusError}</p>}
+      {bootErrorText && <p className="px-5 pt-2 text-sm text-red-700">{bootErrorText}</p>}
+      {statusErrorText && <p className="px-5 pt-2 text-sm text-red-700">{statusErrorText}</p>}
 
       <OffersToolbar
         view={view}

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { JobOffer, OfferStatus } from './api'
-import { fadeOpacity, groupByStatus, isTerminal, OFFER_STATUSES, STATUS_META } from './offerStatus'
+import { fadeOpacity, groupByStatus, isTerminal, OFFER_STATUSES, STATUS_META, statusLabel } from './offerStatus'
 import { relativeTime } from './relativeTime'
 import { SourceBotIcon } from './SourceBotIcon'
 import { StatusSelect } from './StatusSelect'
@@ -14,6 +15,7 @@ export function Board({
   onSelect: (offer: JobOffer) => void
   onStatusChange: (status: OfferStatus, offerId: string) => void
 }) {
+  const { t } = useTranslation()
   const byStatus = groupByStatus(offers)
   const draggingId = useRef<string | null>(null)
 
@@ -37,7 +39,9 @@ export function Board({
             >
               <div className="flex flex-shrink-0 items-center gap-2 rounded-t-xl border-b border-border bg-surface/70 p-3.5">
                 <span className={`h-2.5 w-2.5 rounded-full ${meta.dot}`} />
-                <h2 className="text-xs font-semibold tracking-wide text-ink uppercase">{meta.label}</h2>
+                <h2 className="text-xs font-semibold tracking-wide text-ink uppercase">
+                  {statusLabel(status, t)}
+                </h2>
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${meta.badge}`}>{items.length}</span>
               </div>
               <div
@@ -81,6 +85,7 @@ function OfferCard({
   onBeginDrag: (id: string) => void
   onEndDrag: () => void
 }) {
+  const { t } = useTranslation()
   const terminal = isTerminal(offer.status)
   const opacity = terminal ? fadeOpacity(offer.fadeStartedAt) : 1
   return (
@@ -132,12 +137,12 @@ function OfferCard({
 
       {offer.tags.length > 0 && (
         <div className="mt-2.5 flex flex-wrap gap-1">
-          {offer.tags.slice(0, 4).map((t) => (
+          {offer.tags.slice(0, 4).map((tag) => (
             <span
-              key={t}
+              key={tag}
               className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-ink-muted"
             >
-              {t}
+              {tag}
             </span>
           ))}
         </div>
@@ -145,7 +150,7 @@ function OfferCard({
 
       <div className="mt-3.5 flex items-center justify-between border-t border-border pt-2.5">
         <label className="flex items-center gap-1.5">
-          <span className="text-[11px] font-medium text-ink-muted">Status:</span>
+          <span className="text-[11px] font-medium text-ink-muted">{t('board.status')}</span>
           <StatusSelect offer={offer} onStatusChange={onStatusChange} />
         </label>
         {terminal ? (
@@ -154,7 +159,7 @@ function OfferCard({
             className="text-xs text-ink-muted underline hover:text-ink"
             onClick={() => onStatusChange('NEW', offer.id)}
           >
-            Przywróć
+            {t('common.restore')}
           </button>
         ) : (
           <span className="text-[10px] text-ink-muted">{relativeTime(offer.foundAt)}</span>

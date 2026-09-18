@@ -1,14 +1,10 @@
 import { useEffect, useRef, type ReactNode } from 'react'
-import { LogOut, Moon, Search, Sun } from 'lucide-react'
+import { Languages, LogOut, Moon, Search, Sun } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { logout, type Me, type UserSummary } from './api'
 import { BrandMark } from './BrandMark'
-import { useTheme, type ThemePreference } from './theme'
-
-const PREF_LABEL: Record<ThemePreference, string> = {
-  light: 'Jasny',
-  dark: 'Ciemny',
-  system: 'Systemowy',
-}
+import { normalizeLocale, setAppLocale, SUPPORTED_LOCALES } from './i18n'
+import { useTheme } from './theme'
 
 export function Shell({
   children,
@@ -27,10 +23,14 @@ export function Shell({
   search: string
   onSearchChange: (q: string) => void
 }) {
+  const { t, i18n } = useTranslation()
   const searchRef = useRef<HTMLInputElement>(null)
   const initial = (me.displayName.trim()[0] ?? '?').toUpperCase()
   const { preference, resolved, cycle } = useTheme()
-  const themeLabel = `Motyw: ${PREF_LABEL[preference]}`
+  const locale = normalizeLocale(i18n.language)
+  const themeName = t(`theme.${preference}`)
+  const themeLabel = t('theme.label', { name: themeName })
+  const languageLabel = t('shell.language', { code: locale.toUpperCase() })
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -42,6 +42,12 @@ export function Shell({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  function cycleLocale() {
+    const i = SUPPORTED_LOCALES.indexOf(locale)
+    const next = SUPPORTED_LOCALES[(i + 1) % SUPPORTED_LOCALES.length]!
+    void setAppLocale(next)
+  }
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-paper">
@@ -62,12 +68,12 @@ export function Shell({
               <>
                 <div className="hidden h-6 w-px bg-border sm:block" />
                 <div className="flex items-center gap-2">
-                  <span className="hidden text-xs font-medium text-ink-muted lg:inline">Kandydat:</span>
+                  <span className="hidden text-xs font-medium text-ink-muted lg:inline">{t('shell.candidate')}</span>
                   <select
                     className="rounded-lg border border-border bg-surface-muted px-3 py-1.5 text-xs font-semibold text-ink focus:ring-2 focus:ring-brand focus:outline-none"
                     value={ownerUserId}
                     onChange={(e) => onOwnerChange(e.target.value)}
-                    aria-label="Wybierz kandydata"
+                    aria-label={t('shell.selectCandidate')}
                   >
                     {users.map((u) => (
                       <option key={u.id} value={u.id}>
@@ -88,9 +94,9 @@ export function Shell({
               <input
                 ref={searchRef}
                 className="w-full rounded-lg border border-border bg-surface-muted py-1.5 pr-12 pl-9 text-xs text-ink placeholder:text-ink-muted focus:bg-surface focus:ring-2 focus:ring-brand focus:outline-none"
-                placeholder="Szukaj ofert, firm, technologii..."
+                placeholder={t('shell.searchPlaceholder')}
                 type="search"
-                aria-label="Szukaj ofert"
+                aria-label={t('shell.searchAria')}
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
@@ -111,6 +117,15 @@ export function Shell({
             <button
               type="button"
               className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-muted hover:text-ink"
+              title={languageLabel}
+              aria-label={languageLabel}
+              onClick={cycleLocale}
+            >
+              <Languages className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="rounded-lg p-1.5 text-ink-muted hover:bg-surface-muted hover:text-ink"
               title={themeLabel}
               aria-label={themeLabel}
               onClick={cycle}
@@ -120,7 +135,7 @@ export function Shell({
             <button
               type="button"
               className="rounded-lg p-1.5 text-ink-muted hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
-              title="Wyloguj się"
+              title={t('shell.logout')}
               onClick={() => logout().then(() => window.location.assign('/'))}
             >
               <LogOut className="h-4 w-4" />

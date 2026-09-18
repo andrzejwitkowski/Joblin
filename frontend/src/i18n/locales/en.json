@@ -1,0 +1,102 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "close": "Close",
+    "restore": "Restore",
+    "details": "Details",
+    "status": "Status",
+    "all": "All",
+    "clearFilters": "Clear filters"
+  },
+  "shell": {
+    "candidate": "Candidate:",
+    "selectCandidate": "Select candidate",
+    "searchPlaceholder": "Search offers, companies, technologies…",
+    "searchAria": "Search offers",
+    "logout": "Log out",
+    "language": "Language: {{code}}"
+  },
+  "theme": {
+    "label": "Theme: {{name}}",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Google login. Whitelisted accounts only.",
+    "continueGoogle": "Continue with Google"
+  },
+  "toolbar": {
+    "boardTitle": "Offer board",
+    "listTitle": "Offer list",
+    "kanban": "Kanban",
+    "list": "List",
+    "source": "Source:",
+    "allSources": "All",
+    "from": "From:",
+    "to": "To:"
+  },
+  "board": {
+    "status": "Status:"
+  },
+  "list": {
+    "colRoleCompany": "Role & company",
+    "colStatus": "Status",
+    "colSalary": "Salary",
+    "colTech": "Technologies",
+    "colActivity": "Activity",
+    "colActions": "Actions",
+    "empty": "No offers for the selected filters"
+  },
+  "detail": {
+    "back": "Offer board",
+    "foundAt": "Found {{when}}",
+    "apply": "Apply / open source",
+    "metadata": "Metadata & source",
+    "bot": "Bot",
+    "updated": "Updated",
+    "canonicalUrl": "Canonical URL"
+  },
+  "drawer": {
+    "openSource": "Open source",
+    "fullView": "Full view",
+    "offerStatus": "Offer status: {{status}}",
+    "source": "Source: {{bot}}",
+    "foundAt": "Found: {{when}}",
+    "updatedAt": "Updated: {{when}}"
+  },
+  "sections": {
+    "verifiedSource": "Verified external source",
+    "copyLink": "Copy link",
+    "openPage": "Open page",
+    "itemsCount": "{{title}} · {{count}} items"
+  },
+  "status": {
+    "NEW": "New",
+    "INTERESTED": "Interested",
+    "APPLIED": "Applied",
+    "NOT_FOR_ME": "Rejected",
+    "CLOSED": "Didn't work out"
+  },
+  "time": {
+    "justNow": "just now",
+    "minAgo": "{{count}} min ago",
+    "hourAgo": "{{count}}h ago",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}} days ago"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "notFound": "Not found",
+    "forbidden": "Forbidden",
+    "unauthorized": "Unauthorized",
+    "invalidRequest": "Invalid request",
+    "invalidRequestBody": "Invalid request body",
+    "loadUsers": "Failed to load users",
+    "updateStatus": "Failed to update status"
+  },
+  "app": {
+    "documentTitle": "Joblin — Offer board"
+  }
+}
