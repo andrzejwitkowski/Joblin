@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getMe, getUsers, type JobOffer, type Me, type OfferStatus, type SourceBot, type UserSummary } from './api'
 import { Board } from './Board'
+import { translateApiError } from './i18n/errors'
 import { LoginScreen } from './LoginScreen'
 import { OfferDetail } from './OfferDetail'
 import { OfferDrawer } from './OfferDrawer'
@@ -13,6 +15,7 @@ import { useOffers } from './useOffers'
 type Selection = { offer: JobOffer; mode: 'drawer' | 'detail' }
 
 export default function App() {
+  const { t } = useTranslation()
   const [me, setMe] = useState<Me | null | undefined>(undefined)
   const [users, setUsers] = useState<UserSummary[]>([])
   const [ownerUserId, setOwnerUserId] = useState('')
@@ -33,7 +36,7 @@ export default function App() {
     const nextEnds = offers
       .filter((o) => !o.isDeleted && isTerminal(o.status) && o.fadeStartedAt)
       .map((o) => new Date(o.fadeStartedAt!).getTime() + FADE_MS)
-      .filter((t) => t > Date.now())
+      .filter((end) => end > Date.now())
     if (nextEnds.length === 0) return
     const id = window.setTimeout(() => setNow(Date.now()), Math.min(...nextEnds) - Date.now())
     return () => window.clearTimeout(id)
@@ -54,7 +57,7 @@ export default function App() {
             setOwnerUserId((list.find((u) => u.role === 'USER') ?? list[0] ?? user).id)
           } catch (err) {
             console.error(err)
-            if (!cancelled) setBootError('Failed to load users')
+            if (!cancelled) setBootError(translateApiError('Failed to load users'))
             setOwnerUserId(user.id)
           }
         } else {
@@ -85,12 +88,12 @@ export default function App() {
       .then(syncOffer)
       .catch((err: unknown) => {
         console.error(err)
-        setStatusError(err instanceof Error ? err.message : 'Failed to update status')
+        setStatusError(translateApiError(err instanceof Error ? err : 'Failed to update status'))
       })
   }
 
   if (me === undefined) {
-    return <div className="grid min-h-full place-items-center text-ink-muted">Ładowanie…</div>
+    return <div className="grid min-h-full place-items-center text-ink-muted">{t('common.loading')}</div>
   }
   if (me === null) return <LoginScreen />
 

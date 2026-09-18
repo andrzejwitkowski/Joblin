@@ -1,0 +1,102 @@
+{
+  "common": {
+    "loading": "Laden…",
+    "close": "Schließen",
+    "restore": "Wiederherstellen",
+    "details": "Details",
+    "status": "Status",
+    "all": "Alle",
+    "clearFilters": "Filter löschen"
+  },
+  "shell": {
+    "candidate": "Kandidat:",
+    "selectCandidate": "Kandidat auswählen",
+    "searchPlaceholder": "Angebote, Firmen, Technologien suchen…",
+    "searchAria": "Angebote suchen",
+    "logout": "Abmelden",
+    "language": "Sprache: {{code}}"
+  },
+  "theme": {
+    "label": "Design: {{name}}",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "login": {
+    "title": "Anmelden",
+    "subtitle": "Google-Login. Nur freigeschaltete Konten.",
+    "continueGoogle": "Weiter mit Google"
+  },
+  "toolbar": {
+    "boardTitle": "Angebotsboard",
+    "listTitle": "Angebotsliste",
+    "kanban": "Kanban",
+    "list": "Liste",
+    "source": "Quelle:",
+    "allSources": "Alle",
+    "from": "Von:",
+    "to": "Bis:"
+  },
+  "board": {
+    "status": "Status:"
+  },
+  "list": {
+    "colRoleCompany": "Rolle & Firma",
+    "colStatus": "Status",
+    "colSalary": "Gehalt",
+    "colTech": "Technologien",
+    "colActivity": "Aktivität",
+    "colActions": "Aktionen",
+    "empty": "Keine Angebote für die gewählten Filter"
+  },
+  "detail": {
+    "back": "Angebotsboard",
+    "foundAt": "Gefunden {{when}}",
+    "apply": "Bewerben / Quelle öffnen",
+    "metadata": "Metadaten & Quelle",
+    "bot": "Bot",
+    "updated": "Aktualisiert",
+    "canonicalUrl": "Kanonische URL"
+  },
+  "drawer": {
+    "openSource": "Quelle öffnen",
+    "fullView": "Vollansicht",
+    "offerStatus": "Angebotsstatus: {{status}}",
+    "source": "Quelle: {{bot}}",
+    "foundAt": "Gefunden: {{when}}",
+    "updatedAt": "Aktualisiert: {{when}}"
+  },
+  "sections": {
+    "verifiedSource": "Verifizierte externe Quelle",
+    "copyLink": "Link kopieren",
+    "openPage": "Seite öffnen",
+    "itemsCount": "{{title}} · {{count}} Einträge"
+  },
+  "status": {
+    "NEW": "Neu",
+    "INTERESTED": "Interessiert",
+    "APPLIED": "Beworben",
+    "NOT_FOR_ME": "Abgelehnt",
+    "CLOSED": "Nicht geklappt"
+  },
+  "time": {
+    "justNow": "gerade eben",
+    "minAgo": "vor {{count}} Min.",
+    "hourAgo": "vor {{count}} Std.",
+    "yesterday": "Gestern",
+    "daysAgo": "vor {{count}} Tagen"
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen",
+    "notFound": "Nicht gefunden",
+    "forbidden": "Zugriff verweigert",
+    "unauthorized": "Nicht autorisiert",
+    "invalidRequest": "Ungültige Anfrage",
+    "invalidRequestBody": "Ungültiger Anfragekörper",
+    "loadUsers": "Benutzer konnten nicht geladen werden",
+    "updateStatus": "Status konnte nicht aktualisiert werden"
+  },
+  "app": {
+    "documentTitle": "Joblin — Angebotsboard"
+  }
+}

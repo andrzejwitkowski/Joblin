@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { JobOffer, OfferSection, OfferTone, PillItem, SpecItem, TitledItem } from './api'
 import { OfferIcon } from './offerIcons'
 
@@ -129,6 +130,7 @@ function SectionCard({ children, className }: { children: ReactNode; className: 
 }
 
 function FullSection({ section }: { section: OfferSection }) {
+  const { t } = useTranslation()
   switch (section.type) {
     case 'SPECS':
       return <SpecsGrid items={section.items} cols="grid-cols-2 sm:grid-cols-4" />
@@ -141,7 +143,7 @@ function FullSection({ section }: { section: OfferSection }) {
             </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-xs tracking-wider text-ink-muted uppercase">
-                Zweryfikowane źródło zewnętrzne
+                {t('sections.verifiedSource')}
                 <span className="rounded-md bg-surface px-1.5 py-0.5 font-mono text-[11px] normal-case text-brand shadow-sm">
                   {section.engineLabel}
                   {section.scraperId ? ` · ${section.scraperId}` : ''}
@@ -157,7 +159,7 @@ function FullSection({ section }: { section: OfferSection }) {
               onClick={() => void navigator.clipboard.writeText(section.url)}
             >
               <OfferIcon name="content_copy" size={14} />
-              Kopiuj link
+              {t('sections.copyLink')}
             </button>
             <a
               className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm text-white hover:bg-brand-600"
@@ -165,7 +167,7 @@ function FullSection({ section }: { section: OfferSection }) {
               target="_blank"
               rel="noreferrer"
             >
-              Otwórz stronę
+              {t('sections.openPage')}
               <OfferIcon name="open_in_new" size={14} />
             </a>
           </div>
@@ -201,6 +203,7 @@ function FullSection({ section }: { section: OfferSection }) {
 }
 
 function PreviewSection({ section }: { section: OfferSection }) {
+  const { t } = useTranslation()
   switch (section.type) {
     case 'SPECS':
       return <SpecsGrid items={section.items.slice(0, 4)} cols="grid-cols-2" />
@@ -237,7 +240,7 @@ function PreviewSection({ section }: { section: OfferSection }) {
       return (
         <p className="flex items-center gap-1.5 text-sm text-ink-muted">
           {section.icon && <OfferIcon name={section.icon} size={14} className="text-ink-muted" />}
-          {section.title} · {section.items.length} pozycji
+          {t('sections.itemsCount', { title: section.title, count: section.items.length })}
         </p>
       )
   }

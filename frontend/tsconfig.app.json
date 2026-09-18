@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/theme.selfcheck.ts"]
+  "exclude": ["src/theme.selfcheck.ts", "src/i18n/i18n.selfcheck.ts"]
 }

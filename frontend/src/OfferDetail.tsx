@@ -1,8 +1,9 @@
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { JobOffer, OfferStatus } from './api'
 import { OfferIcon } from './offerIcons'
-import { STATUS_META } from './offerStatus'
+import { statusLabel } from './offerStatus'
 import { OfferSectionsView } from './offerSections'
 import { SourceBotIcon } from './SourceBotIcon'
 import { StatusSelect } from './StatusSelect'
@@ -33,6 +34,8 @@ export function OfferDetail({
   onBack: () => void
   onStatusChange: (status: OfferStatus) => void
 }) {
+  const { t, i18n } = useTranslation()
+  const when = (iso: string) => new Date(iso).toLocaleString(i18n.language)
   return (
     <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-6 pb-10">
       <nav className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
@@ -42,7 +45,7 @@ export function OfferDetail({
           onClick={onBack}
         >
           <ArrowLeft size={16} aria-hidden />
-          Tablica ofert
+          {t('detail.back')}
         </button>
         <span aria-hidden className="text-border">
           /
@@ -78,14 +81,12 @@ export function OfferDetail({
               )}
               {offer.location && <MetaItem icon="location_on">{offer.location}</MetaItem>}
               {offer.workMode && <MetaItem icon="laptop_mac">{offer.workMode}</MetaItem>}
-              <MetaItem icon="schedule">
-                Znaleziono {new Date(offer.foundAt).toLocaleString('pl-PL')}
-              </MetaItem>
+              <MetaItem icon="schedule">{t('detail.foundAt', { when: when(offer.foundAt) })}</MetaItem>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm">
-              <span className="sr-only">Status</span>
+              <span className="sr-only">{t('common.status')}</span>
               <StatusSelect offer={offer} onStatusChange={(status) => onStatusChange(status)} />
             </label>
             <a
@@ -94,7 +95,7 @@ export function OfferDetail({
               target="_blank"
               rel="noreferrer"
             >
-              Aplikuj / otwórz źródło
+              {t('detail.apply')}
               <ExternalLink size={16} aria-hidden />
             </a>
           </div>
@@ -104,29 +105,27 @@ export function OfferDetail({
       <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
         <OfferSectionsView offer={offer} className="lg:col-span-8" />
         <aside className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow-card)] lg:col-span-4">
-          <h3 className="mb-3 text-sm font-semibold text-ink">Metadane i źródło</h3>
+          <h3 className="mb-3 text-sm font-semibold text-ink">{t('detail.metadata')}</h3>
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-muted">Status</dt>
-              <dd className="font-medium text-ink">{STATUS_META[offer.status].label}</dd>
+              <dt className="text-ink-muted">{t('common.status')}</dt>
+              <dd className="font-medium text-ink">{statusLabel(offer.status, t)}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-ink-muted">Bot</dt>
+              <dt className="text-ink-muted">{t('detail.bot')}</dt>
               <dd className="inline-flex items-center gap-1.5 font-mono text-xs text-ink">
                 <SourceBotIcon bot={offer.sourceBot} size={14} />
                 {offer.sourceBot}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-muted">Aktualizacja</dt>
-              <dd className="font-mono text-xs text-ink">
-                {new Date(offer.updatedAt).toLocaleString('pl-PL')}
-              </dd>
+              <dt className="text-ink-muted">{t('detail.updated')}</dt>
+              <dd className="font-mono text-xs text-ink">{when(offer.updatedAt)}</dd>
             </div>
           </dl>
           <div className="mt-4 rounded-xl border border-border bg-surface-muted p-3">
             <span className="block text-[10px] font-semibold tracking-wider text-ink-muted uppercase">
-              Kanoniczny URL
+              {t('detail.canonicalUrl')}
             </span>
             <a
               className="mt-1 block break-all font-mono text-xs text-brand underline"

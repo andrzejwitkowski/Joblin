@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import type { JobOffer, OfferStatus } from './api'
 
 export const OFFER_STATUSES: OfferStatus[] = ['NEW', 'INTERESTED', 'APPLIED', 'NOT_FOR_ME', 'CLOSED']
@@ -6,40 +7,36 @@ export const TERMINAL_STATUSES: OfferStatus[] = ['NOT_FOR_ME', 'CLOSED']
 
 export const FADE_MS = 3 * 24 * 60 * 60 * 1000
 
-export const STATUS_META: Record<
-  OfferStatus,
-  { label: string; dot: string; badge: string; pill: string }
-> = {
+export const STATUS_META: Record<OfferStatus, { dot: string; badge: string; pill: string }> = {
   NEW: {
-    label: 'Nowe',
     dot: 'bg-blue-500',
     badge: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300',
     pill: 'bg-blue-50 text-blue-800 border-blue-200/80 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800',
   },
   INTERESTED: {
-    label: 'Zainteresowany',
     dot: 'bg-amber-500',
     badge: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
     pill: 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800',
   },
   APPLIED: {
-    label: 'Aplikowane',
     dot: 'bg-emerald-500',
     badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300',
     pill: 'bg-emerald-50 text-emerald-800 border-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800',
   },
   NOT_FOR_ME: {
-    label: 'Odrzucone',
     dot: 'bg-slate-400 dark:bg-slate-500',
     badge: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
     pill: 'bg-slate-200 text-slate-600 border-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
   },
   CLOSED: {
-    label: 'Nie wyszło',
     dot: 'bg-rose-400',
     badge: 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300',
     pill: 'bg-rose-50 text-rose-800 border-rose-200/80 dark:bg-rose-950/50 dark:text-rose-200 dark:border-rose-800',
   },
+}
+
+export function statusLabel(status: OfferStatus, t: TFunction): string {
+  return t(`status.${status}`)
 }
 
 export function isTerminal(status: OfferStatus): boolean {

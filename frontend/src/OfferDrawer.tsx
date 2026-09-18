@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { JobOffer } from './api'
-import { STATUS_META } from './offerStatus'
+import { statusLabel } from './offerStatus'
 import { OfferSectionsPreview } from './offerSections'
 
 export function OfferDrawer({
@@ -12,9 +13,11 @@ export function OfferDrawer({
   onClose: () => void
   onOpenFull: () => void
 }) {
+  const { t, i18n } = useTranslation()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
   const previouslyFocused = useRef<HTMLElement | null>(null)
+  const when = (iso: string) => new Date(iso).toLocaleString(i18n.language)
 
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement | null
@@ -47,7 +50,7 @@ export function OfferDrawer({
           onClick={onClose}
           autoFocus
         >
-          Zamknij
+          {t('common.close')}
         </button>
         <h2 id={titleId} className="text-2xl font-semibold text-ink">
           {offer.title}
@@ -65,22 +68,22 @@ export function OfferDrawer({
             target="_blank"
             rel="noreferrer"
           >
-            Otwórz źródło
+            {t('drawer.openSource')}
           </a>
           <button
             type="button"
             className="text-sm font-medium text-brand underline hover:text-brand-600"
             onClick={onOpenFull}
           >
-            Pełny widok
+            {t('drawer.fullView')}
           </button>
         </div>
         <OfferSectionsPreview offer={offer} />
         <dl className="mt-6 space-y-1 text-xs text-ink-muted">
-          <div>Status oferty: {STATUS_META[offer.status].label}</div>
-          <div>Źródło: {offer.sourceBot}</div>
-          <div>Znaleziono: {new Date(offer.foundAt).toLocaleString('pl-PL')}</div>
-          <div>Aktualizacja: {new Date(offer.updatedAt).toLocaleString('pl-PL')}</div>
+          <div>{t('drawer.offerStatus', { status: statusLabel(offer.status, t) })}</div>
+          <div>{t('drawer.source', { bot: offer.sourceBot })}</div>
+          <div>{t('drawer.foundAt', { when: when(offer.foundAt) })}</div>
+          <div>{t('drawer.updatedAt', { when: when(offer.updatedAt) })}</div>
         </dl>
       </aside>
     </dialog>
