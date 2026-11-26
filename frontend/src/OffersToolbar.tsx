@@ -12,6 +12,7 @@ export function OffersToolbar({
   from,
   to,
   hasFilters,
+  filtersOpen,
   onSourceChange,
   onFromChange,
   onToChange,
@@ -24,6 +25,7 @@ export function OffersToolbar({
   from: string
   to: string
   hasFilters: boolean
+  filtersOpen: boolean
   onSourceChange: (v: '' | SourceBot) => void
   onFromChange: (v: string) => void
   onToChange: (v: string) => void
@@ -31,10 +33,10 @@ export function OffersToolbar({
 }) {
   const { t } = useTranslation()
   return (
-    <section className="flex-shrink-0 border-b border-border bg-surface px-5 py-3">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <section className="flex-shrink-0 border-b border-border bg-surface px-3 py-2 md:px-5 md:py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 md:gap-3">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold tracking-tight text-ink">
+          <h1 className="text-sm font-bold tracking-tight text-ink md:text-xl">
             {view === 'kanban' ? t('toolbar.boardTitle') : t('toolbar.listTitle')}
           </h1>
           <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-brand dark:border-blue-800 dark:bg-blue-950/50">
@@ -65,7 +67,10 @@ export function OffersToolbar({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs">
+      <div
+        id="offer-filters"
+        className={`mt-3 flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs md:flex ${filtersOpen ? 'flex' : 'hidden'}`}
+      >
         <div className="flex flex-wrap items-center gap-2.5">
           <label className="flex items-center gap-1.5 font-medium text-ink-muted">
             {t('toolbar.source')}

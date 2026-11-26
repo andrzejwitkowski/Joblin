@@ -23,6 +23,7 @@ export default function App() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [search, setSearch] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [view, setView] = useState<ViewMode>('kanban')
   const [selection, setSelection] = useState<Selection | null>(null)
   const [bootError, setBootError] = useState<string | null>(null)
@@ -31,6 +32,7 @@ export default function App() {
 
   const { offers, moveOffer } = useOffers(me, ownerUserId, { sourceBot, from, to })
   const filtered = visibleOffers(offers, now).filter((o) => matchesSearch(o, search))
+  const hasFilters = Boolean(sourceBot || from || to || search.trim())
   const bootErrorText = bootError ? translateApiError(bootError) : null
   const statusErrorText = statusError ? translateApiError(statusError) : null
 
@@ -127,6 +129,7 @@ export default function App() {
       onOwnerChange={handleOwnerChange}
       search={search}
       onSearchChange={setSearch}
+      mobileFilters={{ open: filtersOpen, active: hasFilters, setOpen: setFiltersOpen }}
     >
       {bootErrorText && <p className="px-5 pt-2 text-sm text-red-700">{bootErrorText}</p>}
       {statusErrorText && <p className="px-5 pt-2 text-sm text-red-700">{statusErrorText}</p>}
@@ -138,7 +141,8 @@ export default function App() {
         sourceBot={sourceBot}
         from={from}
         to={to}
-        hasFilters={Boolean(sourceBot || from || to || search.trim())}
+        hasFilters={hasFilters}
+        filtersOpen={filtersOpen}
         onSourceChange={setSourceBot}
         onFromChange={setFrom}
         onToChange={setTo}
