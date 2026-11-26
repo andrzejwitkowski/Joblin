@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { flushSync } from 'react-dom'
 import { Languages, LogOut, Moon, Search, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { logout, type Me, type UserSummary } from './api'
@@ -14,6 +15,7 @@ export function Shell({
   onOwnerChange,
   search,
   onSearchChange,
+  mobileFilters,
 }: {
   children: ReactNode
   me: Me
@@ -22,9 +24,11 @@ export function Shell({
   onOwnerChange: (id: string) => void
   search: string
   onSearchChange: (q: string) => void
+  mobileFilters?: { open: boolean; active: boolean; setOpen: (open: boolean) => void }
 }) {
   const { t, i18n } = useTranslation()
   const searchRef = useRef<HTMLInputElement>(null)
+  const setFiltersOpen = mobileFilters?.setOpen
   const initial = (me.displayName.trim()[0] ?? '?').toUpperCase()
   const { preference, resolved, cycle } = useTheme()
   const locale = normalizeLocale(i18n.language)
@@ -36,12 +40,16 @@ export function Shell({
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        searchRef.current?.focus()
+        const input = searchRef.current
+        if (input && !input.getClientRects().length && setFiltersOpen) {
+          flushSync(() => setFiltersOpen(true))
+        }
+        input?.focus()
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [setFiltersOpen])
 
   function cycleLocale() {
     const i = SUPPORTED_LOCALES.indexOf(locale)
@@ -52,7 +60,7 @@ export function Shell({
   return (
     <div className="flex h-full flex-col overflow-hidden bg-paper">
       <header className="z-30 flex-shrink-0 border-b border-border bg-surface">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 md:gap-3 md:px-5">
           <div className="flex items-center gap-4 sm:gap-6">
             <a className="flex items-center gap-2.5" href="/">
               <BrandMark />
@@ -86,27 +94,7 @@ export function Shell({
             )}
           </div>
 
-          <div className="order-last w-full max-w-md flex-1 sm:order-none sm:mx-4">
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Search className="h-4 w-4 text-ink-muted" aria-hidden />
-              </div>
-              <input
-                ref={searchRef}
-                className="w-full rounded-lg border border-border bg-surface-muted py-1.5 pr-12 pl-9 text-xs text-ink placeholder:text-ink-muted focus:bg-surface focus:ring-2 focus:ring-brand focus:outline-none"
-                placeholder={t('shell.searchPlaceholder')}
-                type="search"
-                aria-label={t('shell.searchAria')}
-                value={search}
-                onChange={(e) => onSearchChange(e.target.value)}
-              />
-              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 font-mono text-[10px] text-ink-muted">
-                ⌘K
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:order-1 md:gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-xs font-semibold text-paper">
               {initial}
             </div>
@@ -140,6 +128,40 @@ export function Shell({
             >
               <LogOut className="h-4 w-4" />
             </button>
+            {mobileFilters && (
+              <button
+                type="button"
+                aria-expanded={mobileFilters.open}
+                aria-controls="offer-search offer-filters"
+                className={`rounded-lg border border-border px-2 py-2 text-xs font-medium md:hidden ${mobileFilters.active ? 'text-brand' : 'text-ink'}`}
+                onClick={() => mobileFilters.setOpen(!mobileFilters.open)}
+              >
+                {t('toolbar.filters')}
+              </button>
+            )}
+          </div>
+
+          <div
+            id="offer-search"
+            className={`max-w-md basis-full md:mx-4 md:block md:flex-1 ${mobileFilters?.open === false ? 'hidden' : ''}`}
+          >
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search className="h-4 w-4 text-ink-muted" aria-hidden />
+              </div>
+              <input
+                ref={searchRef}
+                className="w-full rounded-lg border border-border bg-surface-muted py-1.5 pr-12 pl-9 text-xs text-ink placeholder:text-ink-muted focus:bg-surface focus:ring-2 focus:ring-brand focus:outline-none"
+                placeholder={t('shell.searchPlaceholder')}
+                type="search"
+                aria-label={t('shell.searchAria')}
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 font-mono text-[10px] text-ink-muted">
+                ⌘K
+              </span>
+            </div>
           </div>
         </div>
       </header>
